@@ -1,0 +1,12 @@
+# Ignore temporary files
+*.tmp
+*.log
+get-docker.sh
+
+# Ignore local minecraft server data
+minecraft-server/
+/opt/minecraft-server/
+
+# OS generated files
+.DS_Store
+Thumbs.db
