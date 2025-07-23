@@ -122,7 +122,7 @@ get_java_configuration() {
     done
     echo -e "${GREEN}✅ Type: $SERVER_TYPE${NC}"
 
-    # Common Configuration
+    # Call common configuration
     get_common_configuration
 }
 
