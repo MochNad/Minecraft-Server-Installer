@@ -200,10 +200,12 @@ get_common_configuration() {
             case "$CRACKED_CHOICE" in
                 [yY]|[yY][eE][sS]) 
                     ONLINE_MODE="FALSE"
+                    CRACKED_STATUS="ENABLED"
                     echo -e "${GREEN}✅ Cracked support: ENABLED${NC}"
                     break;;
                 [nN]|[nN][oO]) 
                     ONLINE_MODE="TRUE"
+                    CRACKED_STATUS="DISABLED"
                     echo -e "${GREEN}✅ Cracked support: DISABLED${NC}"
                     break;;
                 *) echo -e "${RED}❌ Please enter y or n${NC}";;
@@ -211,6 +213,7 @@ get_common_configuration() {
         done
     else
         ONLINE_MODE="TRUE"  # Default for Bedrock
+        CRACKED_STATUS="N/A"
     fi
 
     # Get Game Mode
@@ -221,7 +224,8 @@ get_common_configuration() {
         read -r GAMEMODE_CHOICE
         GAMEMODE_CHOICE=${GAMEMODE_CHOICE:-1}
         case "$GAMEMODE_CHOICE" in
-            1) GAMEMODE="survival"; break;; 2) GAMEMODE="creative"; break;;
+            1) GAMEMODE="survival"; break;; 
+            2) GAMEMODE="creative"; break;;
             3) GAMEMODE="adventure"; break;;
             *) echo -e "${RED}❌ Invalid input.${NC}";;
         esac
@@ -236,8 +240,10 @@ get_common_configuration() {
         read -r MEM_CHOICE
         MEM_CHOICE=${MEM_CHOICE:-2}
         case "$MEM_CHOICE" in
-            1) MEMORY="1G"; break;; 2) MEMORY="2G"; break;;
-            3) MEMORY="3G"; break;; 4) MEMORY="4G"; break;;
+            1) MEMORY="1G"; break;; 
+            2) MEMORY="2G"; break;;
+            3) MEMORY="3G"; break;; 
+            4) MEMORY="4G"; break;;
             *) echo -e "${RED}❌ Invalid input.${NC}";;
         esac
     done
@@ -256,7 +262,7 @@ confirm_configuration() {
     echo -e "${PURPLE}🎮 Version:${NC}     ${WHITE}$MC_VERSION${NC}"
     if [ "$EDITION_CHOICE" == "JAVA" ]; then
         echo -e "${PURPLE}⚡ Type:${NC}        ${WHITE}$SERVER_TYPE${NC}"
-        echo -e "${PURPLE}🔓 Cracked:${NC}     ${WHITE}$([ "$ONLINE_MODE" == "FALSE" ] && echo "ENABLED" || echo "DISABLED")${NC}"
+        echo -e "${PURPLE}🔓 Cracked:${NC}     ${WHITE}$CRACKED_STATUS${NC}"
     fi
     echo -e "${PURPLE}🌐 Port:${NC}        ${WHITE}$SERVER_PORT${NC}"
     echo -e "${PURPLE}🎯 Game Mode:${NC}   ${WHITE}$GAMEMODE${NC}"
