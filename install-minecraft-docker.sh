@@ -20,7 +20,7 @@ echo -e "${LIGHT_BLUE}╔══════════════════�
 echo -e "${LIGHT_BLUE}║${WHITE}          🎮 Minecraft Server Auto Installer 🎮              ${LIGHT_BLUE}║${NC}"
 echo -e "${LIGHT_BLUE}║${CYAN}                    with Docker Support                       ${LIGHT_BLUE}║${NC}"
 echo -e "${LIGHT_BLUE}╚══════════════════════════════════════════════════════════════╝${NC}"
-echo -e "${YELLOW}🚀 Starting configuration process...${NC}"
+echo -e "${YELLOW}🚀 Starting installation process...${NC}"
 sleep 2
 
 # Function to check if running as root
@@ -31,330 +31,34 @@ check_root() {
     fi
 }
 
-# Get all server configuration from user first
-get_server_configuration() {
+# Set default configuration (no user input)
+set_default_configuration() {
     clear
     echo -e "${LIGHT_BLUE}╔══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${LIGHT_BLUE}║${WHITE}              ⚙️  Server Configuration Setup ⚙️               ${LIGHT_BLUE}║${NC}"
+    echo -e "${LIGHT_BLUE}║${WHITE}              📋 Server Configuration 📋                      ${LIGHT_BLUE}║${NC}"
     echo -e "${LIGHT_BLUE}╚══════════════════════════════════════════════════════════════╝${NC}"
-    echo -e "${CYAN}📝 Please configure your Minecraft server settings${NC}"
+    echo -e "${CYAN}🔧 Using optimized default configuration...${NC}"
     echo ""
     
-    # Get Minecraft version
-    echo -e "${PINK}🎯 Available Minecraft versions:${NC}"
-    echo -e "${LIGHT_GREEN}1.${NC} ${WHITE}latest${NC} ${ORANGE}(newest stable)${NC}"
-    echo -e "${LIGHT_GREEN}2.${NC} ${WHITE}1.21.81${NC} ${ORANGE}(latest bedrock compatible)${NC}"
-    echo -e "${LIGHT_GREEN}3.${NC} ${WHITE}1.21.7${NC}"
-    echo -e "${LIGHT_GREEN}4.${NC} ${WHITE}1.21.4${NC}"
-    echo -e "${LIGHT_GREEN}5.${NC} ${WHITE}1.21.1${NC}"
-    echo -e "${LIGHT_GREEN}6.${NC} ${WHITE}1.20.4${NC}"
-    echo -e "${LIGHT_GREEN}7.${NC} ${WHITE}1.19.4${NC}"
-    echo -e "${LIGHT_GREEN}8.${NC} ${WHITE}1.18.2${NC}"
-    echo -e "${LIGHT_GREEN}9.${NC} ${WHITE}1.16.5${NC}"
-    echo ""
+    # Fixed configuration
+    MC_VERSION="1.21.7"
+    SERVER_TYPE="FORGE"
+    SERVER_PORT="25565"
+    ONLINE_MODE="FALSE"
+    CRACKED_STATUS="ENABLED"
+    MAX_PLAYERS="20"
+    MEMORY="2G"
+    MEMORY_LIMIT="3G"
     
-    # Fixed input method - remove -r and add proper validation
-    while true; do
-        echo -ne "${CYAN}🎮 Select Minecraft version (1-9): ${NC}"
-        read VERSION_CHOICE
-        
-        # Remove any whitespace and validate
-        VERSION_CHOICE=$(echo "$VERSION_CHOICE" | tr -d '[:space:]')
-        
-        case "$VERSION_CHOICE" in
-            1)
-                MC_VERSION="latest"
-                echo -e "${LIGHT_GREEN}✅ Selected: latest${NC}"
-                break
-                ;;
-            2)
-                MC_VERSION="1.21.81"
-                echo -e "${LIGHT_GREEN}✅ Selected: 1.21.81${NC}"
-                break
-                ;;
-            3)
-                MC_VERSION="1.21.7"
-                echo -e "${LIGHT_GREEN}✅ Selected: 1.21.7${NC}"
-                break
-                ;;
-            4)
-                MC_VERSION="1.21.4"
-                echo -e "${LIGHT_GREEN}✅ Selected: 1.21.4${NC}"
-                break
-                ;;
-            5)
-                MC_VERSION="1.21.1"
-                echo -e "${LIGHT_GREEN}✅ Selected: 1.21.1${NC}"
-                break
-                ;;
-            6)
-                MC_VERSION="1.20.4"
-                echo -e "${LIGHT_GREEN}✅ Selected: 1.20.4${NC}"
-                break
-                ;;
-            7)
-                MC_VERSION="1.19.4"
-                echo -e "${LIGHT_GREEN}✅ Selected: 1.19.4${NC}"
-                break
-                ;;
-            8)
-                MC_VERSION="1.18.2"
-                echo -e "${LIGHT_GREEN}✅ Selected: 1.18.2${NC}"
-                break
-                ;;
-            9)
-                MC_VERSION="1.16.5"
-                echo -e "${LIGHT_GREEN}✅ Selected: 1.16.5${NC}"
-                break
-                ;;
-            *)
-                echo -e "${LIGHT_RED}❌ Invalid input. Please enter a number between 1-9${NC}"
-                ;;
-        esac
-    done
-    
-    echo ""
-    sleep 1
-    
-    # Get server type
-    echo -e "${PINK}🔧 Available server types:${NC}"
-    echo -e "${LIGHT_GREEN}1.${NC} ${WHITE}VANILLA${NC} ${ORANGE}(Default Minecraft)${NC}"
-    echo -e "${LIGHT_GREEN}2.${NC} ${WHITE}FORGE${NC} ${ORANGE}(Mod support)${NC}"
-    echo -e "${LIGHT_GREEN}3.${NC} ${WHITE}FABRIC${NC} ${ORANGE}(Lightweight mod support)${NC}"
-    echo -e "${LIGHT_GREEN}4.${NC} ${WHITE}PAPER${NC} ${ORANGE}(Performance optimized)${NC}"
-    echo -e "${LIGHT_GREEN}5.${NC} ${WHITE}SPIGOT${NC} ${ORANGE}(Plugin support)${NC}"
-    echo -e "${LIGHT_GREEN}6.${NC} ${WHITE}PURPUR${NC} ${ORANGE}(Enhanced Paper)${NC}"
-    echo -e "${LIGHT_GREEN}7.${NC} ${WHITE}MOHIST${NC} ${ORANGE}(Forge + Bukkit plugins)${NC}"
-    echo ""
-    
-    while true; do
-        echo -ne "${CYAN}⚡ Select server type (1-7): ${NC}"
-        read SERVER_CHOICE
-        
-        # Remove any whitespace
-        SERVER_CHOICE=$(echo "$SERVER_CHOICE" | tr -d '[:space:]')
-        
-        case "$SERVER_CHOICE" in
-            1)
-                SERVER_TYPE="VANILLA"
-                echo -e "${LIGHT_GREEN}✅ Selected: VANILLA${NC}"
-                break
-                ;;
-            2)
-                SERVER_TYPE="FORGE"
-                echo -e "${LIGHT_GREEN}✅ Selected: FORGE${NC}"
-                break
-                ;;
-            3)
-                SERVER_TYPE="FABRIC"
-                echo -e "${LIGHT_GREEN}✅ Selected: FABRIC${NC}"
-                break
-                ;;
-            4)
-                SERVER_TYPE="PAPER"
-                echo -e "${LIGHT_GREEN}✅ Selected: PAPER${NC}"
-                break
-                ;;
-            5)
-                SERVER_TYPE="SPIGOT"
-                echo -e "${LIGHT_GREEN}✅ Selected: SPIGOT${NC}"
-                break
-                ;;
-            6)
-                SERVER_TYPE="PURPUR"
-                echo -e "${LIGHT_GREEN}✅ Selected: PURPUR${NC}"
-                break
-                ;;
-            7)
-                SERVER_TYPE="MOHIST"
-                echo -e "${LIGHT_GREEN}✅ Selected: MOHIST${NC}"
-                break
-                ;;
-            *)
-                echo -e "${LIGHT_RED}❌ Please enter a number between 1-7${NC}"
-                ;;
-        esac
-    done
-    
-    echo ""
-    sleep 1
-    
-    # Get server port
-    while true; do
-        echo -ne "${CYAN}🌐 Enter server port (default 25565): ${NC}"
-        read SERVER_PORT
-        
-        # Remove any whitespace
-        SERVER_PORT=$(echo "$SERVER_PORT" | tr -d '[:space:]')
-        
-        if [ -z "$SERVER_PORT" ]; then
-            SERVER_PORT="25565"
-            echo -e "${LIGHT_GREEN}✅ Using default port: 25565${NC}"
-            break
-        elif [[ "$SERVER_PORT" =~ ^[0-9]+$ ]] && [ "$SERVER_PORT" -ge 1024 ] && [ "$SERVER_PORT" -le 65535 ]; then
-            echo -e "${LIGHT_GREEN}✅ Port set to: $SERVER_PORT${NC}"
-            break
-        else
-            echo -e "${LIGHT_RED}❌ Please enter a valid port number (1024-65535)${NC}"
-        fi
-    done
-    
-    echo ""
-    sleep 1
-    
-    # Get cracked support
-    while true; do
-        echo -ne "${CYAN}🔓 Enable cracked players support? (y/n, default y): ${NC}"
-        read CRACKED_CHOICE
-        
-        # Remove any whitespace and convert to lowercase
-        CRACKED_CHOICE=$(echo "$CRACKED_CHOICE" | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')
-        
-        if [ -z "$CRACKED_CHOICE" ] || [ "$CRACKED_CHOICE" = "y" ] || [ "$CRACKED_CHOICE" = "yes" ]; then
-            ONLINE_MODE="FALSE"
-            CRACKED_STATUS="ENABLED"
-            echo -e "${LIGHT_GREEN}✅ Cracked players: ENABLED${NC}"
-            break
-        elif [ "$CRACKED_CHOICE" = "n" ] || [ "$CRACKED_CHOICE" = "no" ]; then
-            ONLINE_MODE="TRUE"
-            CRACKED_STATUS="DISABLED"
-            echo -e "${LIGHT_GREEN}✅ Cracked players: DISABLED${NC}"
-            break
-        else
-            echo -e "${LIGHT_RED}❌ Please enter y or n${NC}"
-        fi
-    done
-    
-    echo ""
-    sleep 1
-    
-    # Get max players
-    while true; do
-        echo -ne "${CYAN}👥 Maximum players (default 20): ${NC}"
-        read MAX_PLAYERS
-        
-        # Remove any whitespace
-        MAX_PLAYERS=$(echo "$MAX_PLAYERS" | tr -d '[:space:]')
-        
-        if [ -z "$MAX_PLAYERS" ]; then
-            MAX_PLAYERS="20"
-            echo -e "${LIGHT_GREEN}✅ Max players: 20${NC}"
-            break
-        elif [[ "$MAX_PLAYERS" =~ ^[0-9]+$ ]] && [ "$MAX_PLAYERS" -ge 1 ] && [ "$MAX_PLAYERS" -le 200 ]; then
-            echo -e "${LIGHT_GREEN}✅ Max players: $MAX_PLAYERS${NC}"
-            break
-        else
-            echo -e "${LIGHT_RED}❌ Please enter a number between 1-200${NC}"
-        fi
-    done
-    
-    echo ""
-    sleep 1
-    
-    # Get memory allocation
-    echo -e "${PINK}💾 Available memory options:${NC}"
-    echo -e "${LIGHT_GREEN}1.${NC} ${WHITE}1GB${NC} ${ORANGE}(for low-end VPS)${NC}"
-    echo -e "${LIGHT_GREEN}2.${NC} ${WHITE}2GB${NC} ${ORANGE}(recommended minimum)${NC}"
-    echo -e "${LIGHT_GREEN}3.${NC} ${WHITE}3GB${NC} ${ORANGE}(good performance)${NC}"
-    echo -e "${LIGHT_GREEN}4.${NC} ${WHITE}4GB${NC} ${ORANGE}(high performance)${NC}"
-    echo -e "${LIGHT_GREEN}5.${NC} ${WHITE}Custom amount${NC}"
-    echo ""
-    
-    while true; do
-        echo -ne "${CYAN}🔋 Select memory allocation (1-5): ${NC}"
-        read MEMORY_CHOICE
-        
-        # Remove any whitespace
-        MEMORY_CHOICE=$(echo "$MEMORY_CHOICE" | tr -d '[:space:]')
-        
-        case "$MEMORY_CHOICE" in
-            1)
-                MEMORY="1G"
-                MEMORY_LIMIT="1536M"
-                echo -e "${LIGHT_GREEN}✅ Memory: 1GB${NC}"
-                break
-                ;;
-            2)
-                MEMORY="2G"
-                MEMORY_LIMIT="3G"
-                echo -e "${LIGHT_GREEN}✅ Memory: 2GB${NC}"
-                break
-                ;;
-            3)
-                MEMORY="3G"
-                MEMORY_LIMIT="4G"
-                echo -e "${LIGHT_GREEN}✅ Memory: 3GB${NC}"
-                break
-                ;;
-            4)
-                MEMORY="4G"
-                MEMORY_LIMIT="5G"
-                echo -e "${LIGHT_GREEN}✅ Memory: 4GB${NC}"
-                break
-                ;;
-            5)
-                while true; do
-                    echo -ne "${CYAN}💾 Enter custom memory (e.g., 512M, 1G, 2G): ${NC}"
-                    read CUSTOM_MEMORY
-                    
-                    # Remove any whitespace and convert to uppercase
-                    CUSTOM_MEMORY=$(echo "$CUSTOM_MEMORY" | tr -d '[:space:]' | tr '[:lower:]' '[:upper:]')
-                    
-                    if [[ "$CUSTOM_MEMORY" =~ ^[0-9]+[MG]$ ]]; then
-                        MEMORY="$CUSTOM_MEMORY"
-                        # Calculate limit (add buffer)
-                        if [[ "$CUSTOM_MEMORY" =~ ^[0-9]+M$ ]]; then
-                            NUM=$(echo "$CUSTOM_MEMORY" | sed 's/M//')
-                            MEMORY_LIMIT="$((NUM + 512))M"
-                        else
-                            NUM=$(echo "$CUSTOM_MEMORY" | sed 's/G//')
-                            MEMORY_LIMIT="$((NUM + 1))G"
-                        fi
-                        echo -e "${LIGHT_GREEN}✅ Memory: $MEMORY${NC}"
-                        break
-                    else
-                        echo -e "${LIGHT_RED}❌ Please enter a valid memory format (e.g., 512M, 2G)${NC}"
-                    fi
-                done
-                break
-                ;;
-            *)
-                echo -e "${LIGHT_RED}❌ Please enter a number between 1-5${NC}"
-                ;;
-        esac
-    done
-    
-    # Show configuration summary
-    clear
-    echo -e "${LIGHT_BLUE}╔══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${LIGHT_BLUE}║${WHITE}              📋 Configuration Summary 📋                      ${LIGHT_BLUE}║${NC}"
-    echo -e "${LIGHT_BLUE}╚══════════════════════════════════════════════════════════════╝${NC}"
     echo -e "${PINK}🎮 Minecraft Version:${NC} ${LIGHT_GREEN}$MC_VERSION${NC}"
-    echo -e "${PINK}⚡ Server Type:${NC} ${LIGHT_GREEN}$SERVER_TYPE${NC}"
+    echo -e "${PINK}⚡ Server Type:${NC} ${LIGHT_GREEN}$SERVER_TYPE${NC} ${ORANGE}(Mod Support)${NC}"
     echo -e "${PINK}🌐 Server Port:${NC} ${LIGHT_GREEN}$SERVER_PORT${NC}"
     echo -e "${PINK}🔓 Cracked Support:${NC} ${LIGHT_GREEN}$CRACKED_STATUS${NC}"
     echo -e "${PINK}👥 Max Players:${NC} ${LIGHT_GREEN}$MAX_PLAYERS${NC}"
     echo -e "${PINK}💾 Memory Allocation:${NC} ${LIGHT_GREEN}$MEMORY${NC} ${ORANGE}(limit: $MEMORY_LIMIT)${NC}"
     echo ""
-    
-    while true; do
-        echo -ne "${CYAN}✅ Confirm configuration and start installation? (${YELLOW}y/n${CYAN}): ${NC}"
-        read CONFIRM
-        
-        # Remove any whitespace and convert to lowercase
-        CONFIRM=$(echo "$CONFIRM" | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')
-        
-        if [ "$CONFIRM" = "y" ] || [ "$CONFIRM" = "yes" ]; then
-            echo -e "${LIGHT_GREEN}🚀 Starting installation with your configuration...${NC}"
-            sleep 2
-            break
-        elif [ "$CONFIRM" = "n" ] || [ "$CONFIRM" = "no" ]; then
-            echo -e "${YELLOW}❌ Installation cancelled. Run the script again to reconfigure.${NC}"
-            exit 0
-        else
-            echo -e "${LIGHT_RED}❌ Please enter y or n${NC}"
-        fi
-    done
+    echo -e "${LIGHT_GREEN}✅ Configuration ready! Starting installation...${NC}"
+    sleep 3
 }
 
 # Update system
@@ -457,12 +161,12 @@ setup_minecraft_server() {
     echo -e "${LIGHT_BLUE}╔══════════════════════════════════════════════════════════════╗${NC}"
     echo -e "${LIGHT_BLUE}║${WHITE}        🔧 Step 4: Setting Up Server Configuration 🔧        ${LIGHT_BLUE}║${NC}"
     echo -e "${LIGHT_BLUE}╚══════════════════════════════════════════════════════════════╝${NC}"
-    echo -e "${YELLOW}🎮 Setting up Minecraft server with your configuration...${NC}"
+    echo -e "${YELLOW}🎮 Setting up Minecraft Forge 1.21.7 server...${NC}"
     
     mkdir -p /opt/minecraft-server
     cd /opt/minecraft-server
     
-    # Create docker-compose.yml with user configuration
+    # Create docker-compose.yml with fixed configuration
     cat > docker-compose.yml << EOF
 version: '3.9'
 
@@ -479,7 +183,7 @@ services:
       ONLINE_MODE: "$ONLINE_MODE"
       DIFFICULTY: "normal"
       MAX_PLAYERS: "$MAX_PLAYERS"
-      MOTD: "Welcome to $SERVER_TYPE Server v$MC_VERSION - Port $SERVER_PORT"
+      MOTD: "Welcome to Forge 1.21.7 Server - Mods Supported!"
       ALLOW_FLIGHT: "TRUE"
       SPAWN_PROTECTION: "0"
       MEMORY: "$MEMORY"
@@ -487,6 +191,10 @@ services:
       ENABLE_RCON: "TRUE"
       RCON_PORT: "25575"
       RCON_PASSWORD: ""
+      # Forge specific settings
+      FORGE_VERSION: "RECOMMENDED"
+      REMOVE_OLD_MODS: "TRUE"
+      MODS_FILE: ""
     volumes:
       - minecraft-data:/data
     restart: unless-stopped
@@ -504,7 +212,7 @@ volumes:
     driver: local
 EOF
 
-    echo -e "${LIGHT_GREEN}✅ Docker configuration created${NC}"
+    echo -e "${LIGHT_GREEN}✅ Forge server configuration created${NC}"
     echo -e "${LIGHT_GREEN}✅ Server configuration completed!${NC}"
     sleep 2
 }
@@ -515,7 +223,7 @@ start_server() {
     echo -e "${LIGHT_BLUE}╔══════════════════════════════════════════════════════════════╗${NC}"
     echo -e "${LIGHT_BLUE}║${WHITE}           🚀 Step 5: Starting Minecraft Server 🚀            ${LIGHT_BLUE}║${NC}"
     echo -e "${LIGHT_BLUE}╚══════════════════════════════════════════════════════════════╝${NC}"
-    echo -e "${YELLOW}🎮 Starting Minecraft server...${NC}"
+    echo -e "${YELLOW}🎮 Starting Forge 1.21.7 server...${NC}"
     cd /opt/minecraft-server
     
     # Pull the latest image
@@ -523,23 +231,24 @@ start_server() {
     docker-compose pull
     
     # Start the server
-    echo -e "${CYAN}🚀 Starting server container...${NC}"
+    echo -e "${CYAN}🚀 Starting Forge server container...${NC}"
     docker-compose up -d
     
     clear
     echo -e "${LIGHT_BLUE}╔══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${LIGHT_BLUE}║${WHITE}         🎉 Installation Completed Successfully! 🎉           ${LIGHT_BLUE}║${NC}"
+    echo -e "${LIGHT_BLUE}║${WHITE}         🎉 Forge Server Installation Complete! 🎉            ${LIGHT_BLUE}║${NC}"
     echo -e "${LIGHT_BLUE}╚══════════════════════════════════════════════════════════════╝${NC}"
     echo ""
     echo -e "${PINK}📊 Server details:${NC}"
-    echo -e "${CYAN}  • Version:${NC} ${LIGHT_GREEN}$MC_VERSION${NC}"
-    echo -e "${CYAN}  • Type:${NC} ${LIGHT_GREEN}$SERVER_TYPE${NC}"
+    echo -e "${CYAN}  • Version:${NC} ${LIGHT_GREEN}Minecraft $MC_VERSION${NC}"
+    echo -e "${CYAN}  • Type:${NC} ${LIGHT_GREEN}$SERVER_TYPE${NC} ${ORANGE}(Mod Support Enabled)${NC}"
     echo -e "${CYAN}  • Port:${NC} ${LIGHT_GREEN}$SERVER_PORT${NC}"
     echo -e "${CYAN}  • RCON Port:${NC} ${LIGHT_GREEN}25575${NC} ${ORANGE}(no password)${NC}"
     echo -e "${CYAN}  • Cracked players:${NC} ${LIGHT_GREEN}$CRACKED_STATUS${NC}"
     echo -e "${CYAN}  • Max players:${NC} ${LIGHT_GREEN}$MAX_PLAYERS${NC}"
     echo -e "${CYAN}  • Memory:${NC} ${LIGHT_GREEN}$MEMORY${NC} ${ORANGE}(limit: $MEMORY_LIMIT)${NC}"
     echo -e "${CYAN}  • Aikar Flags:${NC} ${LIGHT_GREEN}ENABLED${NC}"
+    echo -e "${CYAN}  • Forge Version:${NC} ${LIGHT_GREEN}RECOMMENDED${NC}"
     echo ""
     echo -e "${PINK}🔒 Security Status:${NC}"
     echo -e "${CYAN}  • SSH Access:${NC} ${LIGHT_GREEN}PROTECTED${NC}"
@@ -551,11 +260,17 @@ start_server() {
     echo -e "${CYAN}  • Stop server:${NC} ${LIGHT_BLUE}cd /opt/minecraft-server && docker-compose down${NC}"
     echo -e "${CYAN}  • Restart server:${NC} ${LIGHT_BLUE}cd /opt/minecraft-server && docker-compose restart${NC}"
     echo -e "${CYAN}  • Server console:${NC} ${LIGHT_BLUE}docker exec -i minecraft-server rcon-cli${NC}"
-    echo -e "${CYAN}  • Firewall status:${NC} ${LIGHT_BLUE}sudo ufw status${NC}"
+    echo -e "${CYAN}  • Add mods folder:${NC} ${LIGHT_BLUE}docker exec minecraft-server ls /data/mods${NC}"
     echo ""
-    echo -e "${LIGHT_GREEN}🎉 Installation completed! Server will be ready in a few minutes.${NC}"
-    echo -e "${YELLOW}🌐 You can connect using your server's IP address on port ${LIGHT_GREEN}$SERVER_PORT${NC}"
-    echo -e "${CYAN}⏱️  First startup may take longer for $SERVER_TYPE server type${NC}"
+    echo -e "${PINK}🔧 Mod Management:${NC}"
+    echo -e "${CYAN}  • Mods folder:${NC} ${LIGHT_BLUE}/opt/minecraft-server/mods${NC}"
+    echo -e "${CYAN}  • Upload mods:${NC} ${LIGHT_BLUE}docker cp mod.jar minecraft-server:/data/mods/${NC}"
+    echo -e "${CYAN}  • Restart after adding mods:${NC} ${LIGHT_BLUE}docker-compose restart${NC}"
+    echo ""
+    echo -e "${LIGHT_GREEN}🎉 Forge 1.21.7 server ready! First startup may take 5-10 minutes.${NC}"
+    echo -e "${YELLOW}🌐 Connect using: ${LIGHT_GREEN}YOUR_SERVER_IP:$SERVER_PORT${NC}"
+    echo -e "${CYAN}⏱️  Forge will download and install automatically on first run${NC}"
+    echo -e "${ORANGE}🔧 You can add mods to the /data/mods folder after startup${NC}"
     echo ""
     echo -e "${LIGHT_RED}⚠️  IMPORTANT: Your SSH access is protected and will remain available${NC}"
 }
@@ -563,7 +278,7 @@ start_server() {
 # Main execution
 main() {
     check_root
-    get_server_configuration
+    set_default_configuration
     update_system
     install_docker
     configure_firewall
