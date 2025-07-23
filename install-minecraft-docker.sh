@@ -308,41 +308,109 @@ check_docker_prerequisites() {
     echo -e "\n${GREEN}✅ Docker is installed.${NC}"
 }
 
+# Function to show progress animation
+show_progress() {
+    local pid=$1
+    local message=$2
+    local delay=0.1
+    local spinstr='|/-\'
+    while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
+        local temp=${spinstr#?}
+        printf "\r${YELLOW}%s [%c]${NC}" "$message" "$spinstr"
+        local spinstr=$temp${spinstr%"$temp"}
+        sleep $delay
+    done
+    printf "\r%s\033[K\n" ""
+}
+
 update_system() {
     echo -e "\n${YELLOW}🔄 Updating system packages...${NC}"
-    apt-get update >/dev/null 2>&1 && apt-get upgrade -y >/dev/null 2>&1
+    
+    # Update package lists
+    echo -e "${CYAN}📋 Updating package lists...${NC}"
+    apt-get update >/dev/null 2>&1 &
+    show_progress $! "Updating package lists"
+    wait $!
+    
+    # Upgrade packages
+    echo -e "${CYAN}⬆️  Upgrading packages...${NC}"
+    apt-get upgrade -y >/dev/null 2>&1 &
+    show_progress $! "Upgrading system packages"
+    wait $!
+    
     echo -e "${GREEN}✅ System updated.${NC}"
 }
 
 install_docker() {
     echo -e "\n${YELLOW}🐳 Installing Docker...${NC}"
-    apt-get install -y ca-certificates curl >/dev/null 2>&1
-    install -m 0755 -d /etc/apt/keyrings
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-    chmod a+r /etc/apt/keyrings/docker.asc
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
-    apt-get update >/dev/null 2>&1
-    apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin >/dev/null 2>&1
-    if [ -n "$SUDO_USER" ]; then usermod -aG docker "$SUDO_USER"; fi
-    systemctl enable --now docker >/dev/null 2>&1
+    
+    # Install prerequisites
+    echo -e "${CYAN}📦 Installing prerequisites...${NC}"
+    apt-get install -y ca-certificates curl >/dev/null 2>&1 &
+    show_progress $! "Installing prerequisites"
+    wait $!
+    
+    # Setup Docker repository
+    echo -e "${CYAN}🔑 Setting up Docker repository...${NC}"
+    {
+        install -m 0755 -d /etc/apt/keyrings
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+        chmod a+r /etc/apt/keyrings/docker.asc
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+        apt-get update >/dev/null 2>&1
+    } &
+    show_progress $! "Setting up Docker repository"
+    wait $!
+    
+    # Install Docker packages
+    echo -e "${CYAN}🐳 Installing Docker packages...${NC}"
+    apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin >/dev/null 2>&1 &
+    show_progress $! "Installing Docker packages"
+    wait $!
+    
+    # Configure Docker
+    echo -e "${CYAN}⚙️  Configuring Docker...${NC}"
+    {
+        if [ -n "$SUDO_USER" ]; then usermod -aG docker "$SUDO_USER"; fi
+        systemctl enable --now docker >/dev/null 2>&1
+    } &
+    show_progress $! "Configuring Docker service"
+    wait $!
+    
     echo -e "${GREEN}✅ Docker installed.${NC}"
 }
 
 configure_firewall() {
     echo -e "\n${YELLOW}🔥 Configuring firewall...${NC}"
+    
+    # Install UFW if needed
     if ! command -v ufw &> /dev/null; then
-        apt-get install -y ufw >/dev/null 2>&1
+        echo -e "${CYAN}🛡️  Installing UFW...${NC}"
+        apt-get install -y ufw >/dev/null 2>&1 &
+        show_progress $! "Installing UFW firewall"
+        wait $!
     fi
-    ufw allow 22/tcp >/dev/null
-    PORT_TYPE=$([ "$EDITION_CHOICE" == "JAVA" ] && echo "tcp" || echo "udp")
-    ufw allow "$SERVER_PORT/$PORT_TYPE" >/dev/null
-    echo "y" | ufw enable >/dev/null
+    
+    # Configure firewall rules
+    echo -e "${CYAN}🔧 Configuring firewall rules...${NC}"
+    {
+        ufw allow 22/tcp >/dev/null
+        PORT_TYPE=$([ "$EDITION_CHOICE" == "JAVA" ] && echo "tcp" || echo "udp")
+        ufw allow "$SERVER_PORT/$PORT_TYPE" >/dev/null
+        echo "y" | ufw enable >/dev/null
+    } &
+    show_progress $! "Applying firewall configuration"
+    wait $!
+    
     echo -e "${GREEN}✅ Firewall configured to allow port $SERVER_PORT.${NC}"
 }
 
 setup_minecraft_server() {
     SERVER_DIR="/opt/minecraft-servers/$SERVER_NAME"
     echo -e "\n${YELLOW}🔧 Creating server files in $SERVER_DIR...${NC}"
+    
+    # Create directory and files
+    echo -e "${CYAN}📁 Creating server directory...${NC}"
     mkdir -p "$SERVER_DIR"
     
     # Use different Docker images and ports based on edition
@@ -358,6 +426,7 @@ setup_minecraft_server() {
         ADDITIONAL_ENV="" # No extra env for bedrock in this simple setup
     fi
 
+    echo -e "${CYAN}📝 Generating docker-compose.yml...${NC}"
     cat > "$SERVER_DIR/docker-compose.yml" << EOF
 version: '3.9'
 services:
@@ -381,6 +450,15 @@ EOF
 start_server() {
     cd "/opt/minecraft-servers/$SERVER_NAME" || exit
     echo -e "\n${YELLOW}🚀 Starting server '$SERVER_NAME'...${NC}"
+    
+    # Pull Docker image
+    echo -e "${CYAN}📥 Pulling Docker image...${NC}"
+    docker compose pull &
+    show_progress $! "Downloading Docker image"
+    wait $!
+    
+    # Start server
+    echo -e "${CYAN}🎮 Starting Minecraft server...${NC}"
     docker compose up -d
     
     clear
