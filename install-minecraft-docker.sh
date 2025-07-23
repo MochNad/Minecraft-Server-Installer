@@ -320,7 +320,7 @@ show_progress() {
         local spinstr=$temp${spinstr%"$temp"}
         sleep $delay
     done
-    printf "\r%s\033[K\n" ""
+    printf "\r%s\033[K" ""
 }
 
 update_system() {
@@ -428,7 +428,6 @@ setup_minecraft_server() {
 
     echo -e "${CYAN}📝 Generating docker-compose.yml...${NC}"
     cat > "$SERVER_DIR/docker-compose.yml" << EOF
-version: '3.9'
 services:
   mc:
     image: $DOCKER_IMAGE
@@ -453,13 +452,15 @@ start_server() {
     
     # Pull Docker image
     echo -e "${CYAN}📥 Pulling Docker image...${NC}"
-    docker compose pull &
+    docker compose pull >/dev/null 2>&1 &
     show_progress $! "Downloading Docker image"
     wait $!
+    echo -e "${GREEN}✅ Docker image downloaded.${NC}"
     
     # Start server
     echo -e "${CYAN}🎮 Starting Minecraft server...${NC}"
-    docker compose up -d
+    docker compose up -d >/dev/null 2>&1
+    echo -e "${GREEN}✅ Server started successfully.${NC}"
     
     clear
     PUBLIC_IP=$(curl -s ipinfo.io/ip)
