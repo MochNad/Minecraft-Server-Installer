@@ -5,9 +5,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Docker](https://img.shields.io/badge/Docker-Enabled-blue.svg)](https://www.docker.com/)
 [![Ubuntu](https://img.shields.io/badge/Ubuntu-18.04+-orange.svg)](https://ubuntu.com/)
-[![Minecraft](https://img.shields.io/badge/Minecraft-Multiple%20Versions-green.svg)](https://minecraft.net/)
+[![Minecraft](https://img.shields.io/badge/Minecraft-Java%20%26%20Bedrock-green.svg)](https://minecraft.net/)
 
-**Automated Minecraft server installer with Docker support for multiple versions, server types, and multi-server management**
+**Automated Minecraft server installer with Docker support for Java & Bedrock editions, multiple versions, and multi-server management**
 
 [Quick Start](#-quick-start) • [Installation](#-installation) • [Management](#-management) • [Reference](#-reference)
 
@@ -39,18 +39,34 @@ sudo ./install.sh
 1. **Full Installation** - Complete setup (System + Docker + Firewall + Server)
 2. **Add New Server** - Quick addition (requires existing Docker)
 
+### Edition Support
+
+- **Java Edition** - PC/Mac with mod/plugin support
+- **Bedrock Edition** - Mobile, Console, Windows 10/11 cross-platform
+
 ### Configuration Options
 
 ```
+💎 Edition           → Java Edition / Bedrock Edition
 🏷️  Server Name       → Custom naming for organization
-🎯 Version           → 9 versions (latest to 1.16.5)
-⚡ Type             → VANILLA/FORGE/FABRIC/PAPER/SPIGOT/PURPUR/MOHIST
-🌐 Port             → Custom port (default: 25565)
-🔓 Cracked Support   → Enable/disable offline mode
-👥 Max Players       → 1-200 players
-🎮 Game Mode        → Survival/Creative/Adventure/Spectator
-💾 Memory           → 1GB-Custom allocation
+🎯 Version           → Predefined versions + Custom version input
+⚡ Type (Java only)  → VANILLA/PAPER/FORGE/FABRIC/SPIGOT
+🌐 Port             → Custom port (Java: 25565, Bedrock: 19132)
+🎮 Game Mode        → Survival/Creative/Adventure
+💾 Memory           → 1GB-4GB allocation
 ```
+
+### Version Options
+
+**Java Edition:**
+
+- latest, 1.21, 1.20.4, 1.19.4, 1.18.2, 1.16.5
+- **Custom**: Enter any version (e.g., 1.20.1, 1.19.2)
+
+**Bedrock Edition:**
+
+- latest (stable), preview (beta)
+- **Custom**: Enter any version (e.g., 1.20.40.01, 1.19.83.01)
 
 ## 🛠️ Management
 
@@ -67,10 +83,10 @@ docker compose restart       # Restart
 docker compose logs -f       # View logs
 
 # Console access (Ctrl+P, Ctrl+Q to exit)
-docker attach minecraft-SERVER_NAME
+docker attach mc-SERVER_NAME
 
 # Status check
-docker ps | grep minecraft
+docker ps | grep mc-
 ```
 
 ### Multi-Server Operations
@@ -84,20 +100,17 @@ for d in /opt/minecraft-servers/*/; do cd "$d" && docker compose up -d; done
 for d in /opt/minecraft-servers/*/; do cd "$d" && docker compose down; done
 
 # Check status
-docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep minecraft
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep mc-
 ```
 
 ### Monitoring & Maintenance
 
 ```bash
 # Resource monitoring
-docker stats minecraft-SERVER_NAME
+docker stats mc-SERVER_NAME
 
 # Error checking
-docker logs minecraft-SERVER_NAME | grep -i "error\|exception"
-
-# Live game mode change
-docker exec minecraft-SERVER_NAME rcon-cli "defaultgamemode survival"
+docker logs mc-SERVER_NAME | grep -i "error\|exception"
 
 # Server updates
 cd /opt/minecraft-servers/SERVER_NAME
@@ -108,30 +121,34 @@ docker compose pull && docker compose restart
 
 ```bash
 # Quick backup
-docker cp minecraft-SERVER_NAME:/data/world ./backup-$(date +%Y%m%d)/
+docker cp mc-SERVER_NAME:/data/worlds ./backup-$(date +%Y%m%d)/    # Bedrock
+docker cp mc-SERVER_NAME:/data/world ./backup-$(date +%Y%m%d)/     # Java
 
-# Add mods/plugins
-docker cp file.jar minecraft-SERVER_NAME:/data/mods/     # Forge/Fabric
-docker cp file.jar minecraft-SERVER_NAME:/data/plugins/ # Paper/Spigot
+# Add mods/plugins (Java only)
+docker cp file.jar mc-SERVER_NAME:/data/mods/     # Forge/Fabric
+docker cp file.jar mc-SERVER_NAME:/data/plugins/  # Paper/Spigot
 
 # List installed
-docker exec minecraft-SERVER_NAME ls /data/mods/
-docker exec minecraft-SERVER_NAME ls /data/plugins/
+docker exec mc-SERVER_NAME ls /data/mods/
+docker exec mc-SERVER_NAME ls /data/plugins/
 ```
 
 ## 📁 File Structure
 
 ```
 /opt/minecraft-servers/
-├── server1/
+├── java-server1/
 │   ├── docker-compose.yml    # Configuration
 │   └── data/
-│       ├── world/           # Game world
+│       ├── world/           # Java world
 │       ├── mods/            # Mods (Forge/Fabric)
 │       ├── plugins/         # Plugins (Paper/Spigot)
 │       └── server.properties
-└── server2/
-    └── ...
+└── bedrock-server1/
+    ├── docker-compose.yml
+    └── data/
+        ├── worlds/          # Bedrock worlds
+        └── server.properties
 ```
 
 ## 🔧 Quick Helper Script
@@ -147,9 +164,9 @@ case $ACTION in
     stop)    cd /opt/minecraft-servers/$SERVER && docker compose down ;;
     restart) cd /opt/minecraft-servers/$SERVER && docker compose restart ;;
     logs)    cd /opt/minecraft-servers/$SERVER && docker compose logs -f ;;
-    console) docker attach minecraft-$SERVER ;;
-    status)  docker ps | grep minecraft-$SERVER ;;
-    backup)  docker cp minecraft-$SERVER:/data/world ./backup-$SERVER-$(date +%Y%m%d)/ ;;
+    console) docker attach mc-$SERVER ;;
+    status)  docker ps | grep mc-$SERVER ;;
+    backup)  docker cp mc-$SERVER:/data/world* ./backup-$SERVER-$(date +%Y%m%d)/ ;;
     *) echo "Usage: $0 SERVER {start|stop|restart|logs|console|status|backup}" ;;
 esac
 EOF
@@ -160,39 +177,54 @@ chmod +x ~/mc.sh
 
 ## 🚨 Troubleshooting
 
-| **Issue**           | **Solution**                        |
-| ------------------- | ----------------------------------- |
-| Server won't start  | `docker logs minecraft-SERVER_NAME` |
-| Port already in use | Change port in docker-compose.yml   |
-| Out of memory       | Increase memory allocation          |
-| Permission denied   | Run with `sudo`                     |
-| Docker not found    | Choose "Full Installation"          |
+| **Issue**            | **Solution**                           |
+| -------------------- | -------------------------------------- |
+| Server won't start   | `docker logs mc-SERVER_NAME`           |
+| Port already in use  | Change port in docker-compose.yml      |
+| Custom version fails | Verify version exists for your edition |
+| Permission denied    | Run with `sudo`                        |
+| Docker not found     | Choose "Full Installation"             |
 
 ## 📋 Reference
 
 ### Daily Commands
 
 ```bash
-docker ps | grep minecraft              # List running servers
-~/mc.sh SERVER_NAME logs               # View logs
-~/mc.sh SERVER_NAME console            # Console access
-~/mc.sh SERVER_NAME backup             # Quick backup
+docker ps | grep mc-                   # List running servers
+~/mc.sh SERVER_NAME logs              # View logs
+~/mc.sh SERVER_NAME console           # Console access
+~/mc.sh SERVER_NAME backup            # Quick backup
 ```
 
 ### Network Management
 
 ```bash
-sudo ufw status                        # Check firewall
-sudo ufw allow NEW_PORT/tcp            # Add port
-telnet SERVER_IP PORT                  # Test connectivity
+sudo ufw status                       # Check firewall
+sudo ufw allow NEW_PORT/tcp           # Add Java port
+sudo ufw allow NEW_PORT/udp           # Add Bedrock port
+telnet SERVER_IP PORT                 # Test connectivity
 ```
+
+### Edition-Specific Notes
+
+**Java Edition:**
+
+- Uses TCP connections
+- Supports mods (Forge/Fabric) and plugins (Paper/Spigot)
+- World folder: `/data/world`
+
+**Bedrock Edition:**
+
+- Uses UDP connections
+- Cross-platform compatible
+- Worlds folder: `/data/worlds`
 
 ### System Maintenance
 
 ```bash
-docker system prune -a                 # Clean unused resources
-sudo systemctl restart docker          # Restart Docker service
-free -h && df -h                       # Check system resources
+docker system prune -a                # Clean unused resources
+sudo systemctl restart docker         # Restart Docker service
+free -h && df -h                      # Check system resources
 ```
 
 ---

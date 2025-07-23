@@ -78,14 +78,30 @@ get_java_configuration() {
     
     # Get Minecraft Version for Java
     echo -e "\n${PURPLE}🎯 Available Java versions:${NC}"
-    echo "1. latest" "2. 1.21" "3. 1.20.4" "4. 1.19.4" "5. 1.18.2" "6. 1.16.5"
+    echo "1. latest" "2. 1.21" "3. 1.20.4" "4. 1.19.4" "5. 1.18.2" "6. 1.16.5" "7. Other (custom version)"
     while true; do
-        echo -ne "${CYAN}🎮 Select version (1-6): ${NC}"
+        echo -ne "${CYAN}🎮 Select version (1-7): ${NC}"
         read -r V_CHOICE
         case "$V_CHOICE" in
-            1) MC_VERSION="latest"; break;; 2) MC_VERSION="1.21"; break;;
-            3) MC_VERSION="1.20.4"; break;; 4) MC_VERSION="1.19.4"; break;;
-            5) MC_VERSION="1.18.2"; break;; 6) MC_VERSION="1.16.5"; break;;
+            1) MC_VERSION="latest"; break;; 
+            2) MC_VERSION="1.21"; break;;
+            3) MC_VERSION="1.20.4"; break;; 
+            4) MC_VERSION="1.19.4"; break;;
+            5) MC_VERSION="1.18.2"; break;; 
+            6) MC_VERSION="1.16.5"; break;;
+            7) 
+                while true; do
+                    echo -ne "${CYAN}📝 Enter custom version (e.g., 1.20.1, 1.19.2): ${NC}"
+                    read -r CUSTOM_VERSION
+                    if [[ "$CUSTOM_VERSION" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
+                        MC_VERSION="$CUSTOM_VERSION"
+                        echo -e "${GREEN}✅ Custom version: $MC_VERSION${NC}"
+                        break
+                    else
+                        echo -e "${RED}❌ Invalid format. Use format like 1.20.1 or 1.19.2${NC}"
+                    fi
+                done
+                break;;
             *) echo -e "${RED}❌ Invalid input.${NC}";;
         esac
     done
@@ -130,12 +146,26 @@ get_bedrock_configuration() {
 
     # Get Minecraft Version for Bedrock
     echo -e "\n${PURPLE}🎯 Available Bedrock versions:${NC}"
-    echo "1. latest (Stable)" "2. preview (Beta)"
+    echo "1. latest (Stable)" "2. preview (Beta)" "3. Other (custom version)"
     while true; do
-        echo -ne "${CYAN}🎮 Select version (1-2): ${NC}"
+        echo -ne "${CYAN}🎮 Select version (1-3): ${NC}"
         read -r V_CHOICE
         case "$V_CHOICE" in
-            1) MC_VERSION="latest"; break;; 2) MC_VERSION="preview"; break;;
+            1) MC_VERSION="latest"; break;; 
+            2) MC_VERSION="preview"; break;;
+            3) 
+                while true; do
+                    echo -ne "${CYAN}📝 Enter custom version (e.g., 1.20.40.01, 1.19.83.01): ${NC}"
+                    read -r CUSTOM_VERSION
+                    if [[ "$CUSTOM_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] || [[ "$CUSTOM_VERSION" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
+                        MC_VERSION="$CUSTOM_VERSION"
+                        echo -e "${GREEN}✅ Custom version: $MC_VERSION${NC}"
+                        break
+                    else
+                        echo -e "${RED}❌ Invalid format. Use format like 1.20.40.01 or 1.20.1${NC}"
+                    fi
+                done
+                break;;
             *) echo -e "${RED}❌ Invalid input.${NC}";;
         esac
     done
