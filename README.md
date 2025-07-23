@@ -52,21 +52,27 @@ sudo ./install.sh
 🎯 Version           → Predefined versions + Custom version input
 ⚡ Type (Java only)  → VANILLA/PAPER/FORGE/FABRIC/SPIGOT
 🌐 Port             → Custom port (Java: 25565, Bedrock: 19132)
+🔓 Cracked (Java)    → Enable/disable offline mode for non-premium players
 🎮 Game Mode        → Survival/Creative/Adventure
 💾 Memory           → 1GB-4GB allocation
 ```
 
-### Version Options
+### Edition Features
 
 **Java Edition:**
 
 - latest, 1.21, 1.20.4, 1.19.4, 1.18.2, 1.16.5
 - **Custom**: Enter any version (e.g., 1.20.1, 1.19.2)
+- **Cracked Support**: Allow non-premium players (offline mode)
+- **Server Types**: VANILLA, PAPER, FORGE, FABRIC, SPIGOT
+- **Mods/Plugins**: Full support for customization
 
 **Bedrock Edition:**
 
 - latest (stable), preview (beta)
 - **Custom**: Enter any version (e.g., 1.20.40.01, 1.19.83.01)
+- **Cross-platform**: Mobile, Console, Windows 10/11 compatibility
+- **Always Online**: Premium accounts required (no cracked support)
 
 ## 🛠️ Management
 
@@ -212,12 +218,14 @@ telnet SERVER_IP PORT                 # Test connectivity
 - Uses TCP connections
 - Supports mods (Forge/Fabric) and plugins (Paper/Spigot)
 - World folder: `/data/world`
+- **Cracked Support**: Can enable offline mode for non-premium players
 
 **Bedrock Edition:**
 
 - Uses UDP connections
 - Cross-platform compatible
 - Worlds folder: `/data/worlds`
+- **Premium Only**: Requires official Microsoft/Mojang accounts
 
 ### System Maintenance
 

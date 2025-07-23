@@ -190,6 +190,29 @@ get_common_configuration() {
         fi
     done
 
+    # Get Cracked Support (Java Edition only)
+    if [ "$EDITION_CHOICE" == "JAVA" ]; then
+        echo -e "\n${PURPLE}🔓 Cracked player support (allows non-premium players):${NC}"
+        while true; do
+            echo -ne "${CYAN}Enable cracked support? (y/n, default n): ${NC}"
+            read -r CRACKED_CHOICE
+            CRACKED_CHOICE=${CRACKED_CHOICE:-n}
+            case "$CRACKED_CHOICE" in
+                [yY]|[yY][eE][sS]) 
+                    ONLINE_MODE="FALSE"
+                    echo -e "${GREEN}✅ Cracked support: ENABLED${NC}"
+                    break;;
+                [nN]|[nN][oO]) 
+                    ONLINE_MODE="TRUE"
+                    echo -e "${GREEN}✅ Cracked support: DISABLED${NC}"
+                    break;;
+                *) echo -e "${RED}❌ Please enter y or n${NC}";;
+            esac
+        done
+    else
+        ONLINE_MODE="TRUE"  # Default for Bedrock
+    fi
+
     # Get Game Mode
     echo -e "\n${PURPLE}🎮 Available game modes:${NC}"
     echo "1. Survival" "2. Creative" "3. Adventure"
@@ -232,7 +255,8 @@ confirm_configuration() {
     echo -e "${PURPLE}💎 Edition:${NC}     ${WHITE}$EDITION_CHOICE${NC}"
     echo -e "${PURPLE}🎮 Version:${NC}     ${WHITE}$MC_VERSION${NC}"
     if [ "$EDITION_CHOICE" == "JAVA" ]; then
-    echo -e "${PURPLE}⚡ Type:${NC}        ${WHITE}$SERVER_TYPE${NC}"
+        echo -e "${PURPLE}⚡ Type:${NC}        ${WHITE}$SERVER_TYPE${NC}"
+        echo -e "${PURPLE}🔓 Cracked:${NC}     ${WHITE}$([ "$ONLINE_MODE" == "FALSE" ] && echo "ENABLED" || echo "DISABLED")${NC}"
     fi
     echo -e "${PURPLE}🌐 Port:${NC}        ${WHITE}$SERVER_PORT${NC}"
     echo -e "${PURPLE}🎯 Game Mode:${NC}   ${WHITE}$GAMEMODE${NC}"
@@ -324,7 +348,8 @@ setup_minecraft_server() {
         DOCKER_IMAGE="itzg/minecraft-server"
         CONTAINER_PORT="25565"
         ADDITIONAL_ENV="
-      TYPE: \"$SERVER_TYPE\""
+      TYPE: \"$SERVER_TYPE\"
+      ONLINE_MODE: \"$ONLINE_MODE\""
     else # Bedrock
         DOCKER_IMAGE="itzg/minecraft-bedrock-server"
         CONTAINER_PORT="19132"
