@@ -31,7 +31,7 @@ show_main_menu() {
             *) echo -e "${RED}❌ Please enter 1 or 2${NC}" ;;
         esac
     done
-    sleep 2
+    # No delay
 }
 
 select_edition_menu() {
@@ -52,7 +52,7 @@ select_edition_menu() {
             *) echo -e "${RED}❌ Please enter 1 or 2${NC}" ;;
         esac
     done
-    sleep 2
+    # No delay
 }
 
 
@@ -64,49 +64,8 @@ get_java_configuration() {
     echo -e "${BLUE}║${WHITE}            ☕ Java Edition Server Configuration ☕            ${BLUE}║${NC}"
     echo -e "${BLUE}╚══════════════════════════════════════════════════════════════╝${NC}"
     
-    # Get Server Name
-    while true; do
-        echo -ne "\n${CYAN}🏷️  Enter a unique server name (no spaces, e.g., 'java-survival'): ${NC}"
-        read -r SERVER_NAME
-        if [[ "$SERVER_NAME" =~ ^[a-z0-9_-]+$ ]] && [ ! -d "/opt/minecraft-servers/$SERVER_NAME" ]; then
-            echo -e "${GREEN}✅ Server name: $SERVER_NAME${NC}"
-            break
-        else
-            echo -e "${RED}❌ Invalid or already exists. Use lowercase letters, numbers, -, _ only.${NC}"
-        fi
-    done
+    get_server_name_and_version
     
-    # Get Minecraft Version for Java
-    echo -e "\n${PURPLE}🎯 Available Java versions:${NC}"
-    echo "1. latest" "2. 1.21" "3. 1.20.4" "4. 1.19.4" "5. 1.18.2" "6. 1.16.5" "7. Other (custom version)"
-    while true; do
-        echo -ne "${CYAN}🎮 Select version (1-7): ${NC}"
-        read -r V_CHOICE
-        case "$V_CHOICE" in
-            1) MC_VERSION="latest"; break;; 
-            2) MC_VERSION="1.21"; break;;
-            3) MC_VERSION="1.20.4"; break;; 
-            4) MC_VERSION="1.19.4"; break;;
-            5) MC_VERSION="1.18.2"; break;; 
-            6) MC_VERSION="1.16.5"; break;;
-            7) 
-                while true; do
-                    echo -ne "${CYAN}📝 Enter custom version (e.g., 1.20.1, 1.19.2): ${NC}"
-                    read -r CUSTOM_VERSION
-                    if [[ "$CUSTOM_VERSION" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
-                        MC_VERSION="$CUSTOM_VERSION"
-                        echo -e "${GREEN}✅ Custom version: $MC_VERSION${NC}"
-                        break
-                    else
-                        echo -e "${RED}❌ Invalid format. Use format like 1.20.1 or 1.19.2${NC}"
-                    fi
-                done
-                break;;
-            *) echo -e "${RED}❌ Invalid input.${NC}";;
-        esac
-    done
-    echo -e "${GREEN}✅ Version: $MC_VERSION${NC}"
-
     # Get Server Type for Java
     echo -e "\n${PURPLE}🔧 Available server types:${NC}"
     echo "1. VANILLA" "2. PAPER" "3. FORGE" "4. FABRIC" "5. SPIGOT"
@@ -122,7 +81,6 @@ get_java_configuration() {
     done
     echo -e "${GREEN}✅ Type: $SERVER_TYPE${NC}"
 
-    # Call common configuration
     get_common_configuration
 }
 
@@ -131,56 +89,57 @@ get_bedrock_configuration() {
     echo -e "${BLUE}╔══════════════════════════════════════════════════════════════╗${NC}"
     echo -e "${BLUE}║${WHITE}           📱 Bedrock Edition Server Configuration 📱           ${BLUE}║${NC}"
     echo -e "${BLUE}╚══════════════════════════════════════════════════════════════╝${NC}"
+    
+    get_server_name_and_version
+    get_common_configuration
+}
 
+get_server_name_and_version(){
     # Get Server Name
     while true; do
-        echo -ne "\n${CYAN}🏷️  Enter a unique server name (no spaces, e.g., 'bedrock-friends'): ${NC}"
+        echo -ne "\n${CYAN}🏷️  Enter a unique server name (e.g., 'survival-squad'): ${NC}"
         read -r SERVER_NAME
         if [[ "$SERVER_NAME" =~ ^[a-z0-9_-]+$ ]] && [ ! -d "/opt/minecraft-servers/$SERVER_NAME" ]; then
             echo -e "${GREEN}✅ Server name: $SERVER_NAME${NC}"
             break
         else
-            echo -e "${RED}❌ Invalid or already exists. Use lowercase letters, numbers, -, _ only.${NC}"
+            echo -e "${RED}❌ Invalid or name already exists. Use lowercase letters, numbers, -, _ only.${NC}"
         fi
     done
 
-    # Get Minecraft Version for Bedrock
-    echo -e "\n${PURPLE}🎯 Available Bedrock versions:${NC}"
-    echo "1. latest (Stable)" "2. preview (Beta)" "3. Other (custom version)"
-    while true; do
-        echo -ne "${CYAN}🎮 Select version (1-3): ${NC}"
-        read -r V_CHOICE
-        case "$V_CHOICE" in
-            1) MC_VERSION="latest"; break;; 
-            2) MC_VERSION="preview"; break;;
-            3) 
-                while true; do
-                    echo -ne "${CYAN}📝 Enter custom version (e.g., 1.20.40.01, 1.19.83.01): ${NC}"
-                    read -r CUSTOM_VERSION
-                    if [[ "$CUSTOM_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] || [[ "$CUSTOM_VERSION" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
-                        MC_VERSION="$CUSTOM_VERSION"
-                        echo -e "${GREEN}✅ Custom version: $MC_VERSION${NC}"
-                        break
-                    else
-                        echo -e "${RED}❌ Invalid format. Use format like 1.20.40.01 or 1.20.1${NC}"
-                    fi
-                done
-                break;;
-            *) echo -e "${RED}❌ Invalid input.${NC}";;
-        esac
-    done
+    # Get Minecraft Version based on Edition
+    if [ "$EDITION_CHOICE" == "JAVA" ]; then
+        echo -e "\n${PURPLE}🎯 Available Java versions:${NC}"
+        echo "1. latest" "2. 1.21" "3. 1.20.4" "4. 1.19.4" "5. 1.18.2" "6. 1.16.5"
+        while true; do
+            echo -ne "${CYAN}🎮 Select version (1-6): ${NC}"
+            read -r V_CHOICE; case "$V_CHOICE" in
+                1) MC_VERSION="latest"; break;; 2) MC_VERSION="1.21"; break;;
+                3) MC_VERSION="1.20.4"; break;; 4) MC_VERSION="1.19.4"; break;;
+                5) MC_VERSION="1.18.2"; break;; 6) MC_VERSION="1.16.5"; break;;
+                *) echo -e "${RED}❌ Invalid input.${NC}";;
+            esac
+        done
+    else # Bedrock
+        echo -e "\n${PURPLE}🎯 Available Bedrock versions:${NC}"
+        echo "1. latest (Stable)" "2. preview (Beta)"
+        while true; do
+            echo -ne "${CYAN}🎮 Select version (1-2): ${NC}"
+            read -r V_CHOICE; case "$V_CHOICE" in
+                1) MC_VERSION="latest"; break;; 2) MC_VERSION="preview"; break;;
+                *) echo -e "${RED}❌ Invalid input.${NC}";;
+            esac
+        done
+    fi
     echo -e "${GREEN}✅ Version: $MC_VERSION${NC}"
-    
-    # Common Configuration
-    get_common_configuration
 }
 
 get_common_configuration() {
     # Get Server Port
     while true; do
-        echo -ne "\n${CYAN}🌐 Enter server port (Java default: 25565, Bedrock default: 19132): ${NC}"
-        read -r SERVER_PORT
         DEFAULT_PORT=$([ "$EDITION_CHOICE" == "JAVA" ] && echo "25565" || echo "19132")
+        echo -ne "\n${CYAN}🌐 Enter server port (default: $DEFAULT_PORT): ${NC}"
+        read -r SERVER_PORT
         SERVER_PORT=${SERVER_PORT:-$DEFAULT_PORT}
         if [[ "$SERVER_PORT" =~ ^[0-9]+$ ]] && [ "$SERVER_PORT" -ge 1024 ] && [ "$SERVER_PORT" -le 65535 ]; then
             echo -e "${GREEN}✅ Port: $SERVER_PORT${NC}"
@@ -198,22 +157,14 @@ get_common_configuration() {
             read -r CRACKED_CHOICE
             CRACKED_CHOICE=${CRACKED_CHOICE:-n}
             case "$CRACKED_CHOICE" in
-                [yY]|[yY][eE][sS]) 
-                    ONLINE_MODE="FALSE"
-                    CRACKED_STATUS="ENABLED"
-                    echo -e "${GREEN}✅ Cracked support: ENABLED${NC}"
-                    break;;
-                [nN]|[nN][oO]) 
-                    ONLINE_MODE="TRUE"
-                    CRACKED_STATUS="DISABLED"
-                    echo -e "${GREEN}✅ Cracked support: DISABLED${NC}"
-                    break;;
+                [yY]*) ONLINE_MODE="FALSE"; CRACKED_STATUS="ENABLED"; echo -e "${GREEN}✅ Cracked support: ENABLED${NC}"; break;;
+                [nN]*) ONLINE_MODE="TRUE"; CRACKED_STATUS="DISABLED"; echo -e "${GREEN}✅ Cracked support: DISABLED${NC}"; break;;
                 *) echo -e "${RED}❌ Please enter y or n${NC}";;
             esac
         done
     else
-        ONLINE_MODE="TRUE"  # Default for Bedrock
-        CRACKED_STATUS="N/A"
+        ONLINE_MODE="TRUE"
+        CRACKED_STATUS="N/A (Bedrock Only)"
     fi
 
     # Get Game Mode
@@ -273,8 +224,8 @@ confirm_configuration() {
         echo -ne "${CYAN}✅ Confirm and start installation? (y/n): ${NC}"
         read -r CONFIRM
         case "$CONFIRM" in
-            [yY]|[yY][eE][sS]) echo -e "${GREEN}🚀 Starting installation...${NC}"; sleep 2; break;;
-            [nN]|[nN][oO]) echo -e "${RED}❌ Installation cancelled.${NC}"; exit 0;;
+            [yY]*) echo -e "${GREEN}🚀 Starting installation...${NC}"; sleep 1; break;;
+            [nN]*) echo -e "${RED}❌ Installation cancelled.${NC}"; exit 0;;
             *) echo -e "${RED}Invalid input.${NC}";;
         esac
     done
@@ -302,14 +253,14 @@ check_docker_prerequisites() {
             echo -ne "${CYAN}Would you like to switch to full installation to install it? (y/n): ${NC}"
             read -r SWITCH_CHOICE
             case "$SWITCH_CHOICE" in
-                y|yes) INSTALL_TYPE="FULL"; echo -e "${GREEN}✅ Switching to full installation...${NC}"; sleep 2; return;;
-                n|no) echo -e "${RED}❌ Installation cancelled.${NC}"; exit 1;;
+                [yY]*) INSTALL_TYPE="FULL"; echo -e "${GREEN}✅ Switching to full installation...${NC}"; sleep 1; return;;
+                [nN]*) echo -e "${RED}❌ Installation cancelled.${NC}"; exit 1;;
                 *) echo -e "${RED}Invalid input.${NC}";;
             esac
         done
     fi
     echo -e "\n${GREEN}✅ Docker is installed.${NC}"
-    sleep 2
+    # No delay
 }
 
 update_system() {
@@ -338,10 +289,14 @@ configure_firewall() {
         apt-get install -y ufw >/dev/null 2>&1
     fi
     ufw allow 22/tcp >/dev/null
-    PORT_TYPE=$([ "$EDITION_CHOICE" == "JAVA" ] && echo "tcp" || echo "udp")
-    ufw allow "$SERVER_PORT/$PORT_TYPE" >/dev/null
+    # Bedrock requires UDP, Java requires TCP
+    if [ "$EDITION_CHOICE" == "JAVA" ]; then
+        ufw allow "$SERVER_PORT/tcp" >/dev/null
+    else
+        ufw allow "$SERVER_PORT/udp" >/dev/null
+    fi
     echo "y" | ufw enable >/dev/null
-    echo -e "${GREEN}✅ Firewall configured to allow port $SERVER_PORT.${NC}"
+    echo -e "${GREEN}✅ Firewall configured to allow traffic on port $SERVER_PORT.${NC}"
 }
 
 setup_minecraft_server() {
@@ -349,19 +304,21 @@ setup_minecraft_server() {
     echo -e "\n${YELLOW}🔧 Creating server files in $SERVER_DIR...${NC}"
     mkdir -p "$SERVER_DIR"
     
-    # Use different Docker images and ports based on edition
+    # Define Java-specific environment variables
+    JAVA_SPECIFIC_ENV=""
     if [ "$EDITION_CHOICE" == "JAVA" ]; then
-        DOCKER_IMAGE="itzg/minecraft-server"
-        CONTAINER_PORT="25565"
-        ADDITIONAL_ENV="
-      TYPE: \"$SERVER_TYPE\"
-      ONLINE_MODE: \"$ONLINE_MODE\""
-    else # Bedrock
-        DOCKER_IMAGE="itzg/minecraft-bedrock-server"
-        CONTAINER_PORT="19132"
-        ADDITIONAL_ENV="" # No extra env for bedrock in this simple setup
+        JAVA_SPECIFIC_ENV=$(cat <<-EOT
+      TYPE: "$SERVER_TYPE"
+      ONLINE_MODE: "$ONLINE_MODE"
+EOT
+)
     fi
 
+    # Define container port based on edition
+    CONTAINER_PORT=$([ "$EDITION_CHOICE" == "JAVA" ] && echo "25565" || echo "19132")
+    DOCKER_IMAGE=$([ "$EDITION_CHOICE" == "JAVA" ] && echo "itzg/minecraft-server" || echo "itzg/minecraft-bedrock-server")
+
+    # Create the docker-compose.yml file
     cat > "$SERVER_DIR/docker-compose.yml" << EOF
 version: '3.9'
 services:
@@ -374,7 +331,8 @@ services:
       EULA: "TRUE"
       VERSION: "$MC_VERSION"
       MEMORY: "$MEMORY"
-      GAMEMODE: "$GAMEMODE"$ADDITIONAL_ENV
+      GAMEMODE: "$GAMEMODE"
+      $JAVA_SPECIFIC_ENV
     volumes:
       - ./data:/data
     restart: unless-stopped
