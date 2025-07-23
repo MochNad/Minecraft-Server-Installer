@@ -419,11 +419,13 @@ setup_minecraft_server() {
         CONTAINER_PORT="25565"
         ADDITIONAL_ENV="
       TYPE: \"$SERVER_TYPE\"
-      ONLINE_MODE: \"$ONLINE_MODE\""
+      ONLINE_MODE: \"$ONLINE_MODE\"
+      MODE: \"$GAMEMODE\""
     else # Bedrock
         DOCKER_IMAGE="itzg/minecraft-bedrock-server"
         CONTAINER_PORT="19132"
-        ADDITIONAL_ENV="" # No extra env for bedrock in this simple setup
+        ADDITIONAL_ENV="
+      GAMEMODE: \"$GAMEMODE\""
     fi
 
     echo -e "${CYAN}📝 Generating docker-compose.yml...${NC}"
@@ -437,8 +439,7 @@ services:
     environment:
       EULA: "TRUE"
       VERSION: "$MC_VERSION"
-      MEMORY: "$MEMORY"
-      GAMEMODE: "$GAMEMODE"$ADDITIONAL_ENV
+      MEMORY: "$MEMORY"$ADDITIONAL_ENV
     volumes:
       - ./data:/data
     restart: unless-stopped
