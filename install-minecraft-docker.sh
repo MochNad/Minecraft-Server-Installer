@@ -1,8 +1,3 @@
-Tentu, ini adalah kode lengkap dengan fungsi instalasi Docker yang diperbarui menggunakan metode repositori resmi yang Anda berikan. Metode ini lebih disarankan untuk sistem produksi.
-
-Bagian `install_docker` telah diubah sepenuhnya, sementara sisa skripnya tetap sama.
-
-```bash
 #!/bin/bash
 
 # Colors for output - Enhanced with more vibrant colors
@@ -119,7 +114,7 @@ get_server_configuration() {
     while true; do
         echo -ne "${CYAN}🌐 Enter server port (default 25565): ${NC}"
         read SERVER_PORT
-        
+
         SERVER_PORT=${SERVER_PORT:-25565}
         
         if [[ "$SERVER_PORT" =~ ^[0-9]+$ ]] && [ "$SERVER_PORT" -ge 1024 ] && [ "$SERVER_PORT" -le 65535 ]; then
@@ -458,4 +453,3 @@ main() {
 
 # Run main function
 main
-```
