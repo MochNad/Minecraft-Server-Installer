@@ -42,8 +42,16 @@ show_main_menu() {
         INSTALL_CHOICE=$(echo "$INSTALL_CHOICE" | tr -d '[:space:]')
         
         case "$INSTALL_CHOICE" in
-            1) INSTALL_TYPE="FULL" echo -e "${LIGHT_GREEN}✅ Selected: Full Installation${NC}" break ;;
-            2) INSTALL_TYPE="SERVER_ONLY" echo -e "${LIGHT_GREEN}✅ Selected: Add New Server Only${NC}" break ;;
+            1) 
+                INSTALL_TYPE="FULL"
+                echo -e "${LIGHT_GREEN}✅ Selected: Full Installation${NC}"
+                break 
+                ;;
+            2) 
+                INSTALL_TYPE="SERVER_ONLY"
+                echo -e "${LIGHT_GREEN}✅ Selected: Add New Server Only${NC}"
+                break 
+                ;;
             *) 
                 echo -e "${LIGHT_RED}❌ Please enter 1 or 2${NC}" 
                 ;;
