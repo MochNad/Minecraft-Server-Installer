@@ -113,23 +113,31 @@ get_minecraft_version() {
     clear
     echo -e "${BLUE}=== Step 4: Select Minecraft Version ===${NC}"
     echo -e "${BLUE}Available Minecraft versions:${NC}"
-    echo "- latest (newest stable)"
-    echo "- 1.21.81 (latest bedrock compatible)"
-    echo "- 1.21.7"
-    echo "- 1.21.4"
-    echo "- 1.21.1"
-    echo "- 1.20.4"
-    echo "- 1.19.4"
-    echo "- 1.18.2"
-    echo "- 1.16.5"
+    echo "1. latest (newest stable)"
+    echo "2. 1.21.81 (latest bedrock compatible)"
+    echo "3. 1.21.7"
+    echo "4. 1.21.4"
+    echo "5. 1.21.1"
+    echo "6. 1.20.4"
+    echo "7. 1.19.4"
+    echo "8. 1.18.2"
+    echo "9. 1.16.5"
     echo ""
     
     while true; do
-        read -p "Enter Minecraft version (or 'latest' for newest): " MC_VERSION
-        if [ ! -z "$MC_VERSION" ]; then
-            break
-        fi
-        echo -e "${RED}Please enter a valid version${NC}"
+        read -p "Select version (1-9): " VERSION_CHOICE
+        case $VERSION_CHOICE in
+            1) MC_VERSION="latest"; break;;
+            2) MC_VERSION="1.21.81"; break;;
+            3) MC_VERSION="1.21.7"; break;;
+            4) MC_VERSION="1.21.4"; break;;
+            5) MC_VERSION="1.21.1"; break;;
+            6) MC_VERSION="1.20.4"; break;;
+            7) MC_VERSION="1.19.4"; break;;
+            8) MC_VERSION="1.18.2"; break;;
+            9) MC_VERSION="1.16.5"; break;;
+            *) echo -e "${RED}Please enter a number between 1-9${NC}";;
+        esac
     done
     
     echo -e "${GREEN}Selected version: $MC_VERSION${NC}"
