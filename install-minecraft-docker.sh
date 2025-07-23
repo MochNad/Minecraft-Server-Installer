@@ -125,19 +125,41 @@ get_minecraft_version() {
     echo ""
     
     while true; do
-        read -p "Select version (1-9): " VERSION_CHOICE
-        case $VERSION_CHOICE in
-            1) MC_VERSION="latest"; break;;
-            2) MC_VERSION="1.21.81"; break;;
-            3) MC_VERSION="1.21.7"; break;;
-            4) MC_VERSION="1.21.4"; break;;
-            5) MC_VERSION="1.21.1"; break;;
-            6) MC_VERSION="1.20.4"; break;;
-            7) MC_VERSION="1.19.4"; break;;
-            8) MC_VERSION="1.18.2"; break;;
-            9) MC_VERSION="1.16.5"; break;;
-            *) echo -e "${RED}Please enter a number between 1-9${NC}";;
-        esac
+        echo -n "Select version (1-9): "
+        read VERSION_CHOICE
+        echo "Debug: You entered '$VERSION_CHOICE'"
+        
+        if [[ "$VERSION_CHOICE" == "1" ]]; then
+            MC_VERSION="latest"
+            break
+        elif [[ "$VERSION_CHOICE" == "2" ]]; then
+            MC_VERSION="1.21.81"
+            break
+        elif [[ "$VERSION_CHOICE" == "3" ]]; then
+            MC_VERSION="1.21.7"
+            break
+        elif [[ "$VERSION_CHOICE" == "4" ]]; then
+            MC_VERSION="1.21.4"
+            break
+        elif [[ "$VERSION_CHOICE" == "5" ]]; then
+            MC_VERSION="1.21.1"
+            break
+        elif [[ "$VERSION_CHOICE" == "6" ]]; then
+            MC_VERSION="1.20.4"
+            break
+        elif [[ "$VERSION_CHOICE" == "7" ]]; then
+            MC_VERSION="1.19.4"
+            break
+        elif [[ "$VERSION_CHOICE" == "8" ]]; then
+            MC_VERSION="1.18.2"
+            break
+        elif [[ "$VERSION_CHOICE" == "9" ]]; then
+            MC_VERSION="1.16.5"
+            break
+        else
+            echo -e "${RED}Please enter a number between 1-9${NC}"
+            continue
+        fi
     done
     
     echo -e "${GREEN}Selected version: $MC_VERSION${NC}"
@@ -159,17 +181,35 @@ get_server_type() {
     echo ""
     
     while true; do
-        read -p "Select server type (1-7): " SERVER_CHOICE
-        case $SERVER_CHOICE in
-            1) SERVER_TYPE="VANILLA"; break;;
-            2) SERVER_TYPE="FORGE"; break;;
-            3) SERVER_TYPE="FABRIC"; break;;
-            4) SERVER_TYPE="PAPER"; break;;
-            5) SERVER_TYPE="SPIGOT"; break;;
-            6) SERVER_TYPE="PURPUR"; break;;
-            7) SERVER_TYPE="MOHIST"; break;;
-            *) echo -e "${RED}Please enter a number between 1-7${NC}";;
-        esac
+        echo -n "Select server type (1-7): "
+        read SERVER_CHOICE
+        echo "Debug: You entered '$SERVER_CHOICE'"
+        
+        if [[ "$SERVER_CHOICE" == "1" ]]; then
+            SERVER_TYPE="VANILLA"
+            break
+        elif [[ "$SERVER_CHOICE" == "2" ]]; then
+            SERVER_TYPE="FORGE"
+            break
+        elif [[ "$SERVER_CHOICE" == "3" ]]; then
+            SERVER_TYPE="FABRIC"
+            break
+        elif [[ "$SERVER_CHOICE" == "4" ]]; then
+            SERVER_TYPE="PAPER"
+            break
+        elif [[ "$SERVER_CHOICE" == "5" ]]; then
+            SERVER_TYPE="SPIGOT"
+            break
+        elif [[ "$SERVER_CHOICE" == "6" ]]; then
+            SERVER_TYPE="PURPUR"
+            break
+        elif [[ "$SERVER_CHOICE" == "7" ]]; then
+            SERVER_TYPE="MOHIST"
+            break
+        else
+            echo -e "${RED}Please enter a number between 1-7${NC}"
+            continue
+        fi
     done
     
     echo -e "${GREEN}Selected server type: $SERVER_TYPE${NC}"
