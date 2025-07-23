@@ -31,7 +31,6 @@ show_main_menu() {
             *) echo -e "${RED}❌ Please enter 1 or 2${NC}" ;;
         esac
     done
-    sleep 2
 }
 
 select_edition_menu() {
@@ -52,9 +51,7 @@ select_edition_menu() {
             *) echo -e "${RED}❌ Please enter 1 or 2${NC}" ;;
         esac
     done
-    sleep 2
 }
-
 
 # --- CONFIGURATION FUNCTIONS ---
 
@@ -272,7 +269,7 @@ confirm_configuration() {
         echo -ne "${CYAN}✅ Confirm and start installation? (y/n): ${NC}"
         read -r CONFIRM
         case "$CONFIRM" in
-            [yY]|[yY][eE][sS]) echo -e "${GREEN}🚀 Starting installation...${NC}"; sleep 2; break;;
+            [yY]|[yY][eE][sS]) echo -e "${GREEN}🚀 Starting installation...${NC}"; break;;
             [nN]|[nN][oO]) echo -e "${RED}❌ Installation cancelled.${NC}"; exit 0;;
             *) echo -e "${RED}Invalid input.${NC}";;
         esac
@@ -301,14 +298,13 @@ check_docker_prerequisites() {
             echo -ne "${CYAN}Would you like to switch to full installation to install it? (y/n): ${NC}"
             read -r SWITCH_CHOICE
             case "$SWITCH_CHOICE" in
-                y|yes) INSTALL_TYPE="FULL"; echo -e "${GREEN}✅ Switching to full installation...${NC}"; sleep 2; return;;
+                y|yes) INSTALL_TYPE="FULL"; echo -e "${GREEN}✅ Switching to full installation...${NC}"; return;;
                 n|no) echo -e "${RED}❌ Installation cancelled.${NC}"; exit 1;;
                 *) echo -e "${RED}Invalid input.${NC}";;
             esac
         done
     fi
     echo -e "\n${GREEN}✅ Docker is installed.${NC}"
-    sleep 2
 }
 
 update_system() {
