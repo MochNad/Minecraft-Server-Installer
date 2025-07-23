@@ -53,44 +53,69 @@ get_server_configuration() {
     echo -e "${LIGHT_GREEN}9.${NC} ${WHITE}1.16.5${NC}"
     echo ""
     
+    # Simplified input method
     while true; do
-        echo -ne "${CYAN}🎮 Select Minecraft version (${YELLOW}1-9${CYAN}): ${NC}"
-        read VERSION_CHOICE
+        printf "${CYAN}🎮 Select Minecraft version (1-9): ${NC}"
+        read -r VERSION_CHOICE
         
-        if [[ "$VERSION_CHOICE" == "1" ]]; then
-            MC_VERSION="latest"
-            break
-        elif [[ "$VERSION_CHOICE" == "2" ]]; then
-            MC_VERSION="1.21.81"
-            break
-        elif [[ "$VERSION_CHOICE" == "3" ]]; then
-            MC_VERSION="1.21.7"
-            break
-        elif [[ "$VERSION_CHOICE" == "4" ]]; then
-            MC_VERSION="1.21.4"
-            break
-        elif [[ "$VERSION_CHOICE" == "5" ]]; then
-            MC_VERSION="1.21.1"
-            break
-        elif [[ "$VERSION_CHOICE" == "6" ]]; then
-            MC_VERSION="1.20.4"
-            break
-        elif [[ "$VERSION_CHOICE" == "7" ]]; then
-            MC_VERSION="1.19.4"
-            break
-        elif [[ "$VERSION_CHOICE" == "8" ]]; then
-            MC_VERSION="1.18.2"
-            break
-        elif [[ "$VERSION_CHOICE" == "9" ]]; then
-            MC_VERSION="1.16.5"
-            break
-        else
-            echo -e "${LIGHT_RED}❌ Please enter a number between 1-9${NC}"
-            continue
-        fi
+        # Debug - show what was entered
+        echo "Debug: Input received: '${VERSION_CHOICE}'"
+        
+        case "${VERSION_CHOICE}" in
+            1)
+                MC_VERSION="latest"
+                echo -e "${LIGHT_GREEN}✅ Selected: latest${NC}"
+                break
+                ;;
+            2)
+                MC_VERSION="1.21.81"
+                echo -e "${LIGHT_GREEN}✅ Selected: 1.21.81${NC}"
+                break
+                ;;
+            3)
+                MC_VERSION="1.21.7"
+                echo -e "${LIGHT_GREEN}✅ Selected: 1.21.7${NC}"
+                break
+                ;;
+            4)
+                MC_VERSION="1.21.4"
+                echo -e "${LIGHT_GREEN}✅ Selected: 1.21.4${NC}"
+                break
+                ;;
+            5)
+                MC_VERSION="1.21.1"
+                echo -e "${LIGHT_GREEN}✅ Selected: 1.21.1${NC}"
+                break
+                ;;
+            6)
+                MC_VERSION="1.20.4"
+                echo -e "${LIGHT_GREEN}✅ Selected: 1.20.4${NC}"
+                break
+                ;;
+            7)
+                MC_VERSION="1.19.4"
+                echo -e "${LIGHT_GREEN}✅ Selected: 1.19.4${NC}"
+                break
+                ;;
+            8)
+                MC_VERSION="1.18.2"
+                echo -e "${LIGHT_GREEN}✅ Selected: 1.18.2${NC}"
+                break
+                ;;
+            9)
+                MC_VERSION="1.16.5"
+                echo -e "${LIGHT_GREEN}✅ Selected: 1.16.5${NC}"
+                break
+                ;;
+            *)
+                echo -e "${LIGHT_RED}❌ Invalid input: '${VERSION_CHOICE}'. Please enter a number between 1-9${NC}"
+                ;;
+        esac
     done
     
     echo ""
+    sleep 1
+    
     # Get server type
     echo -e "${PINK}🔧 Available server types:${NC}"
     echo -e "${LIGHT_GREEN}1.${NC} ${WHITE}VANILLA${NC} ${ORANGE}(Default Minecraft)${NC}"
@@ -103,45 +128,64 @@ get_server_configuration() {
     echo ""
     
     while true; do
-        echo -ne "${CYAN}⚡ Select server type (${YELLOW}1-7${CYAN}): ${NC}"
-        read SERVER_CHOICE
+        printf "${CYAN}⚡ Select server type (1-7): ${NC}"
+        read -r SERVER_CHOICE
         
-        if [[ "$SERVER_CHOICE" == "1" ]]; then
-            SERVER_TYPE="VANILLA"
-            break
-        elif [[ "$SERVER_CHOICE" == "2" ]]; then
-            SERVER_TYPE="FORGE"
-            break
-        elif [[ "$SERVER_CHOICE" == "3" ]]; then
-            SERVER_TYPE="FABRIC"
-            break
-        elif [[ "$SERVER_CHOICE" == "4" ]]; then
-            SERVER_TYPE="PAPER"
-            break
-        elif [[ "$SERVER_CHOICE" == "5" ]]; then
-            SERVER_TYPE="SPIGOT"
-            break
-        elif [[ "$SERVER_CHOICE" == "6" ]]; then
-            SERVER_TYPE="PURPUR"
-            break
-        elif [[ "$SERVER_CHOICE" == "7" ]]; then
-            SERVER_TYPE="MOHIST"
-            break
-        else
-            echo -e "${LIGHT_RED}❌ Please enter a number between 1-7${NC}"
-            continue
-        fi
+        case "${SERVER_CHOICE}" in
+            1)
+                SERVER_TYPE="VANILLA"
+                echo -e "${LIGHT_GREEN}✅ Selected: VANILLA${NC}"
+                break
+                ;;
+            2)
+                SERVER_TYPE="FORGE"
+                echo -e "${LIGHT_GREEN}✅ Selected: FORGE${NC}"
+                break
+                ;;
+            3)
+                SERVER_TYPE="FABRIC"
+                echo -e "${LIGHT_GREEN}✅ Selected: FABRIC${NC}"
+                break
+                ;;
+            4)
+                SERVER_TYPE="PAPER"
+                echo -e "${LIGHT_GREEN}✅ Selected: PAPER${NC}"
+                break
+                ;;
+            5)
+                SERVER_TYPE="SPIGOT"
+                echo -e "${LIGHT_GREEN}✅ Selected: SPIGOT${NC}"
+                break
+                ;;
+            6)
+                SERVER_TYPE="PURPUR"
+                echo -e "${LIGHT_GREEN}✅ Selected: PURPUR${NC}"
+                break
+                ;;
+            7)
+                SERVER_TYPE="MOHIST"
+                echo -e "${LIGHT_GREEN}✅ Selected: MOHIST${NC}"
+                break
+                ;;
+            *)
+                echo -e "${LIGHT_RED}❌ Please enter a number between 1-7${NC}"
+                ;;
+        esac
     done
     
     echo ""
+    sleep 1
+    
     # Get server port
     while true; do
-        echo -ne "${CYAN}🌐 Enter server port (${YELLOW}default 25565${CYAN}): ${NC}"
-        read SERVER_PORT
+        printf "${CYAN}🌐 Enter server port (default 25565): ${NC}"
+        read -r SERVER_PORT
         if [ -z "$SERVER_PORT" ]; then
             SERVER_PORT="25565"
+            echo -e "${LIGHT_GREEN}✅ Using default port: 25565${NC}"
             break
         elif [[ "$SERVER_PORT" =~ ^[0-9]+$ ]] && [ "$SERVER_PORT" -ge 1024 ] && [ "$SERVER_PORT" -le 65535 ]; then
+            echo -e "${LIGHT_GREEN}✅ Port set to: $SERVER_PORT${NC}"
             break
         else
             echo -e "${LIGHT_RED}❌ Please enter a valid port number (1024-65535)${NC}"
@@ -149,17 +193,21 @@ get_server_configuration() {
     done
     
     echo ""
+    sleep 1
+    
     # Get cracked support
     while true; do
-        echo -ne "${CYAN}🔓 Enable cracked players support? (${YELLOW}y/n, default y${CYAN}): ${NC}"
-        read CRACKED_CHOICE
+        printf "${CYAN}🔓 Enable cracked players support? (y/n, default y): ${NC}"
+        read -r CRACKED_CHOICE
         if [ -z "$CRACKED_CHOICE" ] || [[ "$CRACKED_CHOICE" =~ ^[Yy]$ ]]; then
             ONLINE_MODE="FALSE"
             CRACKED_STATUS="ENABLED"
+            echo -e "${LIGHT_GREEN}✅ Cracked players: ENABLED${NC}"
             break
         elif [[ "$CRACKED_CHOICE" =~ ^[Nn]$ ]]; then
             ONLINE_MODE="TRUE"
             CRACKED_STATUS="DISABLED"
+            echo -e "${LIGHT_GREEN}✅ Cracked players: DISABLED${NC}"
             break
         else
             echo -e "${LIGHT_RED}❌ Please enter y or n${NC}"
@@ -167,14 +215,18 @@ get_server_configuration() {
     done
     
     echo ""
+    sleep 1
+    
     # Get max players
     while true; do
-        echo -ne "${CYAN}👥 Maximum players (${YELLOW}default 20${CYAN}): ${NC}"
-        read MAX_PLAYERS
+        printf "${CYAN}👥 Maximum players (default 20): ${NC}"
+        read -r MAX_PLAYERS
         if [ -z "$MAX_PLAYERS" ]; then
             MAX_PLAYERS="20"
+            echo -e "${LIGHT_GREEN}✅ Max players: 20${NC}"
             break
         elif [[ "$MAX_PLAYERS" =~ ^[0-9]+$ ]] && [ "$MAX_PLAYERS" -ge 1 ] && [ "$MAX_PLAYERS" -le 200 ]; then
+            echo -e "${LIGHT_GREEN}✅ Max players: $MAX_PLAYERS${NC}"
             break
         else
             echo -e "${LIGHT_RED}❌ Please enter a number between 1-200${NC}"
@@ -182,6 +234,8 @@ get_server_configuration() {
     done
     
     echo ""
+    sleep 1
+    
     # Get memory allocation
     echo -e "${PINK}💾 Available memory options:${NC}"
     echo -e "${LIGHT_GREEN}1.${NC} ${WHITE}1GB${NC} ${ORANGE}(for low-end VPS)${NC}"
@@ -192,49 +246,60 @@ get_server_configuration() {
     echo ""
     
     while true; do
-        echo -ne "${CYAN}🔋 Select memory allocation (${YELLOW}1-5${CYAN}): ${NC}"
-        read MEMORY_CHOICE
+        printf "${CYAN}🔋 Select memory allocation (1-5): ${NC}"
+        read -r MEMORY_CHOICE
         
-        if [[ "$MEMORY_CHOICE" == "1" ]]; then
-            MEMORY="1G"
-            MEMORY_LIMIT="1536M"
-            break
-        elif [[ "$MEMORY_CHOICE" == "2" ]]; then
-            MEMORY="2G"
-            MEMORY_LIMIT="3G"
-            break
-        elif [[ "$MEMORY_CHOICE" == "3" ]]; then
-            MEMORY="3G"
-            MEMORY_LIMIT="4G"
-            break
-        elif [[ "$MEMORY_CHOICE" == "4" ]]; then
-            MEMORY="4G"
-            MEMORY_LIMIT="5G"
-            break
-        elif [[ "$MEMORY_CHOICE" == "5" ]]; then
-            while true; do
-                echo -ne "${CYAN}💾 Enter custom memory (${YELLOW}e.g., 512M, 1G, 2G${CYAN}): ${NC}"
-                read CUSTOM_MEMORY
-                if [[ "$CUSTOM_MEMORY" =~ ^[0-9]+[MmGg]$ ]]; then
-                    MEMORY="$CUSTOM_MEMORY"
-                    # Calculate limit (add 1G for buffer)
-                    if [[ "$CUSTOM_MEMORY" =~ ^[0-9]+[Mm]$ ]]; then
-                        NUM=$(echo "$CUSTOM_MEMORY" | sed 's/[Mm]//')
-                        MEMORY_LIMIT="$((NUM + 512))M"
+        case "${MEMORY_CHOICE}" in
+            1)
+                MEMORY="1G"
+                MEMORY_LIMIT="1536M"
+                echo -e "${LIGHT_GREEN}✅ Memory: 1GB${NC}"
+                break
+                ;;
+            2)
+                MEMORY="2G"
+                MEMORY_LIMIT="3G"
+                echo -e "${LIGHT_GREEN}✅ Memory: 2GB${NC}"
+                break
+                ;;
+            3)
+                MEMORY="3G"
+                MEMORY_LIMIT="4G"
+                echo -e "${LIGHT_GREEN}✅ Memory: 3GB${NC}"
+                break
+                ;;
+            4)
+                MEMORY="4G"
+                MEMORY_LIMIT="5G"
+                echo -e "${LIGHT_GREEN}✅ Memory: 4GB${NC}"
+                break
+                ;;
+            5)
+                while true; do
+                    printf "${CYAN}💾 Enter custom memory (e.g., 512M, 1G, 2G): ${NC}"
+                    read -r CUSTOM_MEMORY
+                    if [[ "$CUSTOM_MEMORY" =~ ^[0-9]+[MmGg]$ ]]; then
+                        MEMORY="$CUSTOM_MEMORY"
+                        # Calculate limit (add buffer)
+                        if [[ "$CUSTOM_MEMORY" =~ ^[0-9]+[Mm]$ ]]; then
+                            NUM=$(echo "$CUSTOM_MEMORY" | sed 's/[Mm]//')
+                            MEMORY_LIMIT="$((NUM + 512))M"
+                        else
+                            NUM=$(echo "$CUSTOM_MEMORY" | sed 's/[Gg]//')
+                            MEMORY_LIMIT="$((NUM + 1))G"
+                        fi
+                        echo -e "${LIGHT_GREEN}✅ Memory: $MEMORY${NC}"
+                        break
                     else
-                        NUM=$(echo "$CUSTOM_MEMORY" | sed 's/[Gg]//')
-                        MEMORY_LIMIT="$((NUM + 1))G"
+                        echo -e "${LIGHT_RED}❌ Please enter a valid memory format (e.g., 512M, 2G)${NC}"
                     fi
-                    break
-                else
-                    echo -e "${LIGHT_RED}❌ Please enter a valid memory format (e.g., 512M, 2G)${NC}"
-                fi
-            done
-            break
-        else
-            echo -e "${LIGHT_RED}❌ Please enter a number between 1-5${NC}"
-            continue
-        fi
+                done
+                break
+                ;;
+            *)
+                echo -e "${LIGHT_RED}❌ Please enter a number between 1-5${NC}"
+                ;;
+        esac
     done
     
     # Show configuration summary
