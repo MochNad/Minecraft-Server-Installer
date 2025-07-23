@@ -20,8 +20,12 @@
 Deploy your **Minecraft server** in **under 5 minutes** with interactive configuration:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/MochNad/minecraft-server-installer/main/install-minecraft-docker.sh | sudo bash
+wget -O install.sh https://raw.githubusercontent.com/MochNad/minecraft-server-installer/main/install-minecraft-docker.sh
+chmod +x install.sh
+sudo ./install.sh
 ```
+
+> ⚠️ **Security Note**: We recommend using `wget` instead of `curl -fsSL | sudo bash` for better security. Always review scripts before execution.
 
 ## 📋 System Requirements
 
@@ -35,18 +39,25 @@ curl -fsSL https://raw.githubusercontent.com/MochNad/minecraft-server-installer/
 
 ## ⚡ Installation Methods
 
-### Method 1: One-Line Installation (Recommended)
+### Method 1: Secure Installation (Recommended)
 
 ```bash
-# Download and execute automatically
-curl -fsSL https://raw.githubusercontent.com/MochNad/minecraft-server-installer/main/install-minecraft-docker.sh | sudo bash
+# Download script safely
+wget -O install.sh https://raw.githubusercontent.com/MochNad/minecraft-server-installer/main/install-minecraft-docker.sh
+
+# Review the script (optional but recommended)
+cat install.sh
+
+# Make executable and run
+chmod +x install.sh
+sudo ./install.sh
 ```
 
 ### Method 2: Manual Download
 
 ```bash
-# Download script
-wget https://raw.githubusercontent.com/MochNad/minecraft-server-installer/main/install-minecraft-docker.sh
+# Download script with custom name
+wget -O install-minecraft-docker.sh https://raw.githubusercontent.com/MochNad/minecraft-server-installer/main/install-minecraft-docker.sh
 
 # Make executable and run
 chmod +x install-minecraft-docker.sh
