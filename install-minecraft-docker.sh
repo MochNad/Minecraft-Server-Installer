@@ -53,6 +53,7 @@ select_edition_menu() {
     done
 }
 
+
 # --- CONFIGURATION FUNCTIONS ---
 
 get_java_configuration() {
