@@ -183,9 +183,79 @@ docker exec -it minecraft-server bash
 nano /data/server.properties
 ```
 
+## 🔐 Security Best Practices
+
+- ✅ **SSH Protection**: Automatic SSH access protection during firewall setup
+- ✅ **UFW Firewall**: Auto-configured with secure defaults
+- ✅ **Port Management**: Only necessary ports (22, 25565) are opened
+- ✅ **Regular Backups**: Backup world data regularly
+- ✅ **Log Monitoring**: Monitor server logs for suspicious activity
+- ✅ **System Updates**: Keep Docker and system updated
+- ⚠️ **Online Mode**: Consider enabling online-mode for production
+- ⚠️ **Whitelist**: Use whitelist for private servers
+
+### SSH Access Protection
+
+The installer automatically protects your SSH access:
+
+```bash
+# SSH protection is built-in during installation
+# These ports are automatically secured:
+# - Port 22 (SSH) - ALWAYS PROTECTED
+# - Port 25565 (Minecraft) - GAME ACCESS
+# - Custom SSH ports are auto-detected
+
+# Manual SSH protection (if needed)
+sudo ufw allow ssh
+sudo ufw allow 22/tcp
+
+# Check firewall status
+sudo ufw status numbered
+```
+
+### Firewall Management
+
+```bash
+# View current firewall rules
+sudo ufw status verbose
+
+# Add custom port (if needed)
+sudo ufw allow [PORT]/tcp
+
+# Remove rule
+sudo ufw delete [RULE_NUMBER]
+
+# Reset firewall (DANGER - may lock SSH)
+sudo ufw --force reset
+# Then re-run: sudo ufw allow ssh && sudo ufw enable
+```
+
 ## 🔍 Troubleshooting
 
 ### Common Issues
+
+<details>
+<summary>🔒 SSH Access Issues</summary>
+
+```bash
+# If you're locked out of SSH (prevention method)
+# The installer automatically protects SSH access
+# But if issues occur:
+
+# From local console/VNC:
+sudo ufw allow ssh
+sudo ufw allow 22/tcp
+sudo ufw reload
+
+# Check SSH service
+sudo systemctl status ssh
+sudo systemctl restart ssh
+
+# Verify SSH is listening
+sudo netstat -tlnp | grep :22
+```
+
+</details>
 
 <details>
 <summary>🚨 Port 25565 not accessible</summary>
@@ -194,7 +264,7 @@ nano /data/server.properties
 # Check firewall status
 sudo ufw status
 
-# Open required ports
+# Open required ports (SSH is always protected first)
 sudo ufw allow 25565/tcp
 sudo ufw allow 25565/udp
 sudo ufw reload

@@ -63,16 +63,49 @@ install_docker() {
     sleep 2
 }
 
-# Configure firewall
+# Configure firewall with SSH protection
 configure_firewall() {
     clear
     echo -e "${BLUE}=== Step 3: Configuring Firewall ===${NC}"
-    echo -e "${YELLOW}Configuring firewall for port 25565...${NC}"
+    echo -e "${YELLOW}Configuring firewall with SSH protection...${NC}"
+    
+    # Enable SSH before any other rules to prevent lockout
+    echo -e "${YELLOW}Enabling SSH access protection...${NC}"
+    ufw allow ssh
+    ufw allow 22/tcp
+    
+    # Get current SSH port if different from 22
+    SSH_PORT=$(ss -tlnp | grep sshd | awk '{print $4}' | cut -d':' -f2 | head -1)
+    if [ ! -z "$SSH_PORT" ] && [ "$SSH_PORT" != "22" ]; then
+        echo -e "${YELLOW}Detected custom SSH port: $SSH_PORT${NC}"
+        ufw allow $SSH_PORT/tcp
+    fi
+    
+    # Enable Minecraft ports
+    echo -e "${YELLOW}Enabling Minecraft server ports...${NC}"
     ufw allow 25565/tcp
     ufw allow 25565/udp
-    echo -e "${GREEN}Port 25565 enabled in firewall${NC}"
-    echo -e "${GREEN}Firewall configuration completed!${NC}"
-    sleep 2
+    
+    # Set default policies
+    ufw --force default deny incoming
+    ufw --force default allow outgoing
+    
+    # Enable firewall only if not already enabled
+    if ! ufw status | grep -q "Status: active"; then
+        echo -e "${YELLOW}Enabling firewall...${NC}"
+        ufw --force enable
+    fi
+    
+    echo -e "${GREEN}✅ SSH access: PROTECTED${NC}"
+    echo -e "${GREEN}✅ Port 25565: ENABLED${NC}"
+    echo -e "${GREEN}✅ Firewall: ACTIVE${NC}"
+    
+    # Show current SSH connections for verification
+    echo -e "${BLUE}Current SSH connections:${NC}"
+    who | grep pts
+    
+    echo -e "${GREEN}Firewall configuration completed safely!${NC}"
+    sleep 3
 }
 
 # Get Minecraft version from user
@@ -190,7 +223,7 @@ EOF
     sleep 2
 }
 
-# Start the server
+# Enhanced start_server function with firewall status
 start_server() {
     clear
     echo -e "${BLUE}=== Step 7: Starting Minecraft Server ===${NC}"
@@ -216,16 +249,23 @@ start_server() {
     echo -e "- Memory: 2GB (limit: 3GB)"
     echo -e "- Aikar Flags: ${GREEN}ENABLED${NC}"
     echo ""
+    echo -e "${BLUE}Security Status:${NC}"
+    echo -e "- SSH Access: ${GREEN}PROTECTED${NC}"
+    echo -e "- Firewall: ${GREEN}ACTIVE${NC}"
+    echo -e "- Only ports 22 (SSH) and 25565 (Minecraft) are open"
+    echo ""
     echo -e "${YELLOW}Useful commands:${NC}"
     echo -e "- Check logs: ${BLUE}docker logs minecraft-server -f${NC}"
     echo -e "- Stop server: ${BLUE}cd /opt/minecraft-server && docker-compose down${NC}"
     echo -e "- Restart server: ${BLUE}cd /opt/minecraft-server && docker-compose restart${NC}"
     echo -e "- Server console: ${BLUE}docker exec -i minecraft-server rcon-cli${NC}"
-    echo -e "- RCON connect: ${BLUE}docker exec -i minecraft-server rcon-cli${NC}"
+    echo -e "- Firewall status: ${BLUE}sudo ufw status${NC}"
     echo ""
     echo -e "${GREEN}Installation completed! Server will be ready in a few minutes.${NC}"
     echo -e "${YELLOW}You can connect using your server's IP address on port 25565${NC}"
     echo -e "${BLUE}First startup may take longer for $SERVER_TYPE server type${NC}"
+    echo ""
+    echo -e "${RED}IMPORTANT: Your SSH access is protected and will remain available${NC}"
 }
 
 # Main execution
