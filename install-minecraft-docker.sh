@@ -53,15 +53,15 @@ get_server_configuration() {
     echo -e "${LIGHT_GREEN}9.${NC} ${WHITE}1.16.5${NC}"
     echo ""
     
-    # Simplified input method
+    # Fixed input method - remove -r and add proper validation
     while true; do
-        printf "${CYAN}🎮 Select Minecraft version (1-9): ${NC}"
-        read -r VERSION_CHOICE
+        echo -ne "${CYAN}🎮 Select Minecraft version (1-9): ${NC}"
+        read VERSION_CHOICE
         
-        # Debug - show what was entered
-        echo "Debug: Input received: '${VERSION_CHOICE}'"
+        # Remove any whitespace and validate
+        VERSION_CHOICE=$(echo "$VERSION_CHOICE" | tr -d '[:space:]')
         
-        case "${VERSION_CHOICE}" in
+        case "$VERSION_CHOICE" in
             1)
                 MC_VERSION="latest"
                 echo -e "${LIGHT_GREEN}✅ Selected: latest${NC}"
@@ -108,7 +108,7 @@ get_server_configuration() {
                 break
                 ;;
             *)
-                echo -e "${LIGHT_RED}❌ Invalid input: '${VERSION_CHOICE}'. Please enter a number between 1-9${NC}"
+                echo -e "${LIGHT_RED}❌ Invalid input. Please enter a number between 1-9${NC}"
                 ;;
         esac
     done
@@ -128,10 +128,13 @@ get_server_configuration() {
     echo ""
     
     while true; do
-        printf "${CYAN}⚡ Select server type (1-7): ${NC}"
-        read -r SERVER_CHOICE
+        echo -ne "${CYAN}⚡ Select server type (1-7): ${NC}"
+        read SERVER_CHOICE
         
-        case "${SERVER_CHOICE}" in
+        # Remove any whitespace
+        SERVER_CHOICE=$(echo "$SERVER_CHOICE" | tr -d '[:space:]')
+        
+        case "$SERVER_CHOICE" in
             1)
                 SERVER_TYPE="VANILLA"
                 echo -e "${LIGHT_GREEN}✅ Selected: VANILLA${NC}"
@@ -178,8 +181,12 @@ get_server_configuration() {
     
     # Get server port
     while true; do
-        printf "${CYAN}🌐 Enter server port (default 25565): ${NC}"
-        read -r SERVER_PORT
+        echo -ne "${CYAN}🌐 Enter server port (default 25565): ${NC}"
+        read SERVER_PORT
+        
+        # Remove any whitespace
+        SERVER_PORT=$(echo "$SERVER_PORT" | tr -d '[:space:]')
+        
         if [ -z "$SERVER_PORT" ]; then
             SERVER_PORT="25565"
             echo -e "${LIGHT_GREEN}✅ Using default port: 25565${NC}"
@@ -197,14 +204,18 @@ get_server_configuration() {
     
     # Get cracked support
     while true; do
-        printf "${CYAN}🔓 Enable cracked players support? (y/n, default y): ${NC}"
-        read -r CRACKED_CHOICE
-        if [ -z "$CRACKED_CHOICE" ] || [[ "$CRACKED_CHOICE" =~ ^[Yy]$ ]]; then
+        echo -ne "${CYAN}🔓 Enable cracked players support? (y/n, default y): ${NC}"
+        read CRACKED_CHOICE
+        
+        # Remove any whitespace and convert to lowercase
+        CRACKED_CHOICE=$(echo "$CRACKED_CHOICE" | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')
+        
+        if [ -z "$CRACKED_CHOICE" ] || [ "$CRACKED_CHOICE" = "y" ] || [ "$CRACKED_CHOICE" = "yes" ]; then
             ONLINE_MODE="FALSE"
             CRACKED_STATUS="ENABLED"
             echo -e "${LIGHT_GREEN}✅ Cracked players: ENABLED${NC}"
             break
-        elif [[ "$CRACKED_CHOICE" =~ ^[Nn]$ ]]; then
+        elif [ "$CRACKED_CHOICE" = "n" ] || [ "$CRACKED_CHOICE" = "no" ]; then
             ONLINE_MODE="TRUE"
             CRACKED_STATUS="DISABLED"
             echo -e "${LIGHT_GREEN}✅ Cracked players: DISABLED${NC}"
@@ -219,8 +230,12 @@ get_server_configuration() {
     
     # Get max players
     while true; do
-        printf "${CYAN}👥 Maximum players (default 20): ${NC}"
-        read -r MAX_PLAYERS
+        echo -ne "${CYAN}👥 Maximum players (default 20): ${NC}"
+        read MAX_PLAYERS
+        
+        # Remove any whitespace
+        MAX_PLAYERS=$(echo "$MAX_PLAYERS" | tr -d '[:space:]')
+        
         if [ -z "$MAX_PLAYERS" ]; then
             MAX_PLAYERS="20"
             echo -e "${LIGHT_GREEN}✅ Max players: 20${NC}"
@@ -246,10 +261,13 @@ get_server_configuration() {
     echo ""
     
     while true; do
-        printf "${CYAN}🔋 Select memory allocation (1-5): ${NC}"
-        read -r MEMORY_CHOICE
+        echo -ne "${CYAN}🔋 Select memory allocation (1-5): ${NC}"
+        read MEMORY_CHOICE
         
-        case "${MEMORY_CHOICE}" in
+        # Remove any whitespace
+        MEMORY_CHOICE=$(echo "$MEMORY_CHOICE" | tr -d '[:space:]')
+        
+        case "$MEMORY_CHOICE" in
             1)
                 MEMORY="1G"
                 MEMORY_LIMIT="1536M"
@@ -276,16 +294,20 @@ get_server_configuration() {
                 ;;
             5)
                 while true; do
-                    printf "${CYAN}💾 Enter custom memory (e.g., 512M, 1G, 2G): ${NC}"
-                    read -r CUSTOM_MEMORY
-                    if [[ "$CUSTOM_MEMORY" =~ ^[0-9]+[MmGg]$ ]]; then
+                    echo -ne "${CYAN}💾 Enter custom memory (e.g., 512M, 1G, 2G): ${NC}"
+                    read CUSTOM_MEMORY
+                    
+                    # Remove any whitespace and convert to uppercase
+                    CUSTOM_MEMORY=$(echo "$CUSTOM_MEMORY" | tr -d '[:space:]' | tr '[:lower:]' '[:upper:]')
+                    
+                    if [[ "$CUSTOM_MEMORY" =~ ^[0-9]+[MG]$ ]]; then
                         MEMORY="$CUSTOM_MEMORY"
                         # Calculate limit (add buffer)
-                        if [[ "$CUSTOM_MEMORY" =~ ^[0-9]+[Mm]$ ]]; then
-                            NUM=$(echo "$CUSTOM_MEMORY" | sed 's/[Mm]//')
+                        if [[ "$CUSTOM_MEMORY" =~ ^[0-9]+M$ ]]; then
+                            NUM=$(echo "$CUSTOM_MEMORY" | sed 's/M//')
                             MEMORY_LIMIT="$((NUM + 512))M"
                         else
-                            NUM=$(echo "$CUSTOM_MEMORY" | sed 's/[Gg]//')
+                            NUM=$(echo "$CUSTOM_MEMORY" | sed 's/G//')
                             MEMORY_LIMIT="$((NUM + 1))G"
                         fi
                         echo -e "${LIGHT_GREEN}✅ Memory: $MEMORY${NC}"
@@ -318,11 +340,15 @@ get_server_configuration() {
     while true; do
         echo -ne "${CYAN}✅ Confirm configuration and start installation? (${YELLOW}y/n${CYAN}): ${NC}"
         read CONFIRM
-        if [[ "$CONFIRM" =~ ^[Yy]$ ]]; then
+        
+        # Remove any whitespace and convert to lowercase
+        CONFIRM=$(echo "$CONFIRM" | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')
+        
+        if [ "$CONFIRM" = "y" ] || [ "$CONFIRM" = "yes" ]; then
             echo -e "${LIGHT_GREEN}🚀 Starting installation with your configuration...${NC}"
             sleep 2
             break
-        elif [[ "$CONFIRM" =~ ^[Nn]$ ]]; then
+        elif [ "$CONFIRM" = "n" ] || [ "$CONFIRM" = "no" ]; then
             echo -e "${YELLOW}❌ Installation cancelled. Run the script again to reconfigure.${NC}"
             exit 0
         else
@@ -425,11 +451,13 @@ configure_firewall() {
     sleep 3
 }
 
-# Remove individual get functions and use setup directly
+# Setup Minecraft server
 setup_minecraft_server() {
     clear
-    echo -e "${BLUE}=== Step 4: Setting Up Server Configuration ===${NC}"
-    echo -e "${YELLOW}Setting up Minecraft server with your configuration...${NC}"
+    echo -e "${LIGHT_BLUE}╔══════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${LIGHT_BLUE}║${WHITE}        🔧 Step 4: Setting Up Server Configuration 🔧        ${LIGHT_BLUE}║${NC}"
+    echo -e "${LIGHT_BLUE}╚══════════════════════════════════════════════════════════════╝${NC}"
+    echo -e "${YELLOW}🎮 Setting up Minecraft server with your configuration...${NC}"
     
     mkdir -p /opt/minecraft-server
     cd /opt/minecraft-server
@@ -458,6 +486,7 @@ services:
       USE_AIKAR_FLAGS: "TRUE"
       ENABLE_RCON: "TRUE"
       RCON_PORT: "25575"
+      RCON_PASSWORD: ""
     volumes:
       - minecraft-data:/data
     restart: unless-stopped
@@ -475,8 +504,8 @@ volumes:
     driver: local
 EOF
 
-    echo -e "${GREEN}Docker configuration created${NC}"
-    echo -e "${GREEN}Server configuration completed!${NC}"
+    echo -e "${LIGHT_GREEN}✅ Docker configuration created${NC}"
+    echo -e "${LIGHT_GREEN}✅ Server configuration completed!${NC}"
     sleep 2
 }
 
@@ -490,9 +519,11 @@ start_server() {
     cd /opt/minecraft-server
     
     # Pull the latest image
+    echo -e "${CYAN}📥 Pulling latest Docker image...${NC}"
     docker-compose pull
     
     # Start the server
+    echo -e "${CYAN}🚀 Starting server container...${NC}"
     docker-compose up -d
     
     clear
