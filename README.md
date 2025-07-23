@@ -5,11 +5,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Docker](https://img.shields.io/badge/Docker-Enabled-blue.svg)](https://www.docker.com/)
 [![Ubuntu](https://img.shields.io/badge/Ubuntu-18.04+-orange.svg)](https://ubuntu.com/)
-[![Minecraft](https://img.shields.io/badge/Minecraft-1.16.5--Latest-green.svg)](https://minecraft.net/)
+[![Minecraft](https://img.shields.io/badge/Minecraft-Multiple%20Versions-green.svg)](https://minecraft.net/)
 
-**Automated Minecraft server installer using Docker with support for multiple server types and cracked players**
+**Automated Minecraft server installer with Docker support for multiple versions and server types**
 
-[Quick Start](#-quick-start) • [Installation](#-installation) • [Features](#-features) • [Documentation](#-documentation)
+[Quick Start](#-quick-start) • [Installation](#-installation) • [Features](#-features) • [Server Types](#-server-types)
 
 </div>
 
@@ -17,7 +17,7 @@
 
 ## 🚀 Quick Start
 
-Deploy your Minecraft server in **under 5 minutes** with a single command:
+Deploy your **Minecraft server** in **under 5 minutes** with interactive configuration:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/MochNad/minecraft-server-installer/main/install-minecraft-docker.sh | sudo bash
@@ -28,10 +28,10 @@ curl -fsSL https://raw.githubusercontent.com/MochNad/minecraft-server-installer/
 | Component   | Minimum                    | Recommended       |
 | ----------- | -------------------------- | ----------------- |
 | **OS**      | Ubuntu 18.04+ / Debian 10+ | Ubuntu 20.04+     |
-| **RAM**     | 2GB                        | 4GB+              |
-| **Storage** | 10GB free space            | 20GB+             |
-| **CPU**     | 2 cores                    | 4 cores+          |
-| **Network** | Port 25565 open            | Stable connection |
+| **RAM**     | 1GB                        | 4GB+              |
+| **Storage** | 10GB free space            | 25GB+             |
+| **CPU**     | 1 core                     | 4 cores+          |
+| **Network** | Custom port open           | Stable connection |
 
 ## ⚡ Installation Methods
 
@@ -69,45 +69,63 @@ sudo ./install-minecraft-docker.sh
 
 ### ✨ Core Features
 
-- 🔄 **Fully Automated**: Zero manual configuration required
+- 🔄 **Fully Automated**: Interactive configuration with smart defaults
 - 🐳 **Docker-based**: Containerized for better isolation and management
-- 🌐 **Cracked Support**: Offline mode enabled for cracked clients
-- ⚡ **Performance Optimized**: Aikar flags and memory optimization
-- 🔒 **Security**: Automatic firewall configuration
+- 🌐 **Cracked Support**: Optional offline mode for cracked clients
+- ⚡ **Performance Optimized**: Aikar flags and configurable memory allocation
+- 🔒 **Security**: Automatic firewall configuration with SSH protection
+- 🎮 **Multi-Version**: Support for multiple Minecraft versions
+- 🔧 **Multi-Type**: Support for various server types
 
-### 🎮 Supported Server Types
+### 🎮 Supported Versions
 
-| Type        | Description               | Best For                  |
-| ----------- | ------------------------- | ------------------------- |
-| **Vanilla** | Official Minecraft server | Pure Minecraft experience |
-| **Paper**   | High-performance fork     | Large servers, plugins    |
-| **Spigot**  | Popular plugin platform   | Custom plugins            |
-| **Forge**   | Mod support platform      | Modded gameplay           |
-| **Fabric**  | Lightweight mod loader    | Modern mods               |
-| **Purpur**  | Enhanced Paper fork       | Advanced features         |
-| **Mohist**  | Forge + Bukkit hybrid     | Mods + Plugins            |
+| Version     | Status         | Description               |
+| ----------- | -------------- | ------------------------- |
+| **latest**  | ✅ Recommended | Newest stable version     |
+| **1.21.81** | ✅ Available   | Latest bedrock compatible |
+| **1.21.7**  | ✅ Available   | Stable release            |
+| **1.21.4**  | ✅ Available   | Previous stable           |
+| **1.21.1**  | ✅ Available   | LTS support               |
+| **1.20.4**  | ✅ Available   | Popular version           |
+| **1.19.4**  | ✅ Available   | Legacy support            |
+| **1.18.2**  | ✅ Available   | Classic version           |
+| **1.16.5**  | ✅ Available   | Modded favorite           |
 
-### 🔧 Supported Versions
+### 🔧 Server Types
 
-- **Latest** (Always up-to-date)
-- **1.21.x** (Current)
-- **1.20.x** (Stable)
-- **1.19.x** (Legacy)
-- **1.18.x** (Legacy)
-- **1.16.5** (Popular)
+| Type        | Description                    | Best For          |
+| ----------- | ------------------------------ | ----------------- |
+| **VANILLA** | Official Minecraft server      | Pure experience   |
+| **FORGE**   | Mod support framework          | Heavy modding     |
+| **FABRIC**  | Lightweight mod loader         | Performance mods  |
+| **PAPER**   | High-performance Spigot fork   | Large servers     |
+| **SPIGOT**  | Plugin-based server            | Custom plugins    |
+| **PURPUR**  | Paper fork with extra features | Advanced features |
+| **MOHIST**  | Forge + Bukkit hybrid          | Mods + Plugins    |
 
-## 📊 Server Configuration
+## 📊 Interactive Configuration
+
+The installer provides an interactive setup where you can configure:
+
+```
+🎯 Minecraft Version Selection (1-9 options)
+⚡ Server Type Selection (7 options)
+🌐 Custom Port Configuration (default: 25565)
+🔓 Cracked Player Support (optional)
+👥 Maximum Players (1-200)
+💾 Memory Allocation (1GB-Custom)
+```
+
+### Example Configuration Output
 
 ```yaml
-Default Settings:
-├── Port: 25565 (TCP/UDP)
-├── RCON: 25575 (enabled)
+📋 Configuration Summary:
+├── Version: 1.21.7
+├── Type: FORGE
+├── Port: 25565
+├── Cracked Support: ENABLED
 ├── Max Players: 20
-├── Memory: 2GB (limit: 3GB)
-├── Difficulty: Normal
-├── Online Mode: False (cracked)
-├── Flight: Enabled
-└── Spawn Protection: Disabled
+└── Memory: 2G (limit: 3G)
 ```
 
 ## 🛠️ Server Management
@@ -119,210 +137,159 @@ Default Settings:
 docker ps
 
 # View live logs
-docker logs minecraft-server -f
+cd /opt/minecraft-server && docker compose logs -f
 
-# Server console (RCON)
-docker exec -i minecraft-server rcon-cli
+# Server console access
+docker attach minecraft-server
+
+# Check server details
+docker inspect minecraft-server
 ```
 
 ### Control Commands
 
 ```bash
 # Stop server
-cd /opt/minecraft-server && docker-compose down
+cd /opt/minecraft-server && docker compose down
 
 # Start server
-cd /opt/minecraft-server && docker-compose up -d
+cd /opt/minecraft-server && docker compose up -d
 
 # Restart server
-cd /opt/minecraft-server && docker-compose restart
+cd /opt/minecraft-server && docker compose restart
 
 # Update server
-cd /opt/minecraft-server && docker-compose pull && docker-compose up -d
+cd /opt/minecraft-server && docker compose pull && docker compose up -d
 ```
 
 ### Advanced Management
 
 ```bash
-# Edit server configuration
-sudo nano /opt/minecraft-server/docker-compose.yml
+# Access server files
+docker exec -it minecraft-server bash
 
 # Backup world data
-docker cp minecraft-server:/data/world ./backup-$(date +%Y%m%d)/
+docker cp minecraft-server:/data/world ./backup-world-$(date +%Y%m%d)/
 
 # View resource usage
 docker stats minecraft-server
 
-# Scale memory (edit docker-compose.yml)
-# MEMORY: "4G" for 4GB allocation
+# Edit server properties
+docker exec -it minecraft-server nano /data/server.properties
 ```
 
-## 🔧 Configuration
+## 🔧 Mod and Plugin Management
 
-### Memory Optimization
-
-```yaml
-# For 1GB RAM servers
-MEMORY: "512M"
-
-# For 2GB RAM servers (default)
-MEMORY: "2G"
-
-# For 4GB+ RAM servers
-MEMORY: "3G"
-```
-
-### Custom Server Properties
+### For Modded Servers (Forge/Fabric)
 
 ```bash
-# Access server files
-cd /opt/minecraft-server
-docker exec -it minecraft-server bash
+# Add mods
+docker cp yourmod.jar minecraft-server:/data/mods/
 
-# Edit server.properties
-nano /data/server.properties
+# List installed mods
+docker exec minecraft-server ls -la /data/mods/
+
+# Remove a mod
+docker exec minecraft-server rm /data/mods/unwanted-mod.jar
 ```
 
-## 🔐 Security Best Practices
+### For Plugin Servers (Paper/Spigot/Purpur)
+
+```bash
+# Add plugins
+docker cp yourplugin.jar minecraft-server:/data/plugins/
+
+# List installed plugins
+docker exec minecraft-server ls -la /data/plugins/
+
+# Remove a plugin
+docker exec minecraft-server rm /data/plugins/unwanted-plugin.jar
+```
+
+## 🔐 Security Features
 
 - ✅ **SSH Protection**: Automatic SSH access protection during firewall setup
 - ✅ **UFW Firewall**: Auto-configured with secure defaults
-- ✅ **Port Management**: Only necessary ports (22, 25565) are opened
-- ✅ **Regular Backups**: Backup world data regularly
-- ✅ **Log Monitoring**: Monitor server logs for suspicious activity
-- ✅ **System Updates**: Keep Docker and system updated
-- ⚠️ **Online Mode**: Consider enabling online-mode for production
-- ⚠️ **Whitelist**: Use whitelist for private servers
-
-### SSH Access Protection
-
-The installer automatically protects your SSH access:
-
-```bash
-# SSH protection is built-in during installation
-# These ports are automatically secured:
-# - Port 22 (SSH) - ALWAYS PROTECTED
-# - Port 25565 (Minecraft) - GAME ACCESS
-# - Custom SSH ports are auto-detected
-
-# Manual SSH protection (if needed)
-sudo ufw allow ssh
-sudo ufw allow 22/tcp
-
-# Check firewall status
-sudo ufw status numbered
-```
-
-### Firewall Management
-
-```bash
-# View current firewall rules
-sudo ufw status verbose
-
-# Add custom port (if needed)
-sudo ufw allow [PORT]/tcp
-
-# Remove rule
-sudo ufw delete [RULE_NUMBER]
-
-# Reset firewall (DANGER - may lock SSH)
-sudo ufw --force reset
-# Then re-run: sudo ufw allow ssh && sudo ufw enable
-```
+- ✅ **Port Management**: Only necessary ports (22, custom) are opened
+- ✅ **Docker Isolation**: Server runs in isolated container
+- ✅ **RCON Security**: Configurable RCON access with password protection
 
 ## 🔍 Troubleshooting
 
 ### Common Issues
 
 <details>
-<summary>🔒 SSH Access Issues</summary>
+<summary>🔧 Server Won't Start</summary>
 
 ```bash
-# If you're locked out of SSH (prevention method)
-# The installer automatically protects SSH access
-# But if issues occur:
+# Check container status
+docker ps -a
 
-# From local console/VNC:
-sudo ufw allow ssh
-sudo ufw allow 22/tcp
-sudo ufw reload
+# View startup logs
+docker logs minecraft-server
 
-# Check SSH service
-sudo systemctl status ssh
-sudo systemctl restart ssh
+# Check for common issues
+docker logs minecraft-server | grep -i "error\|exception"
 
-# Verify SSH is listening
-sudo netstat -tlnp | grep :22
+# Restart with fresh configuration
+cd /opt/minecraft-server && docker compose down && docker compose up -d
 ```
 
 </details>
 
 <details>
-<summary>🚨 Port 25565 not accessible</summary>
+<summary>🎮 Connection Issues</summary>
 
 ```bash
-# Check firewall status
-sudo ufw status
-
-# Open required ports (SSH is always protected first)
-sudo ufw allow 25565/tcp
-sudo ufw allow 25565/udp
-sudo ufw reload
-
-# Check if service is running
+# Check server status
 docker ps | grep minecraft
+
+# Verify port is open
+sudo ufw status | grep YOUR_PORT
+
+# Test server connectivity
+telnet YOUR_SERVER_IP YOUR_PORT
+
+# Check if server is accepting connections
+docker logs minecraft-server | grep -i "done\|started"
 ```
 
 </details>
 
 <details>
-<summary>💾 Memory/Performance Issues</summary>
+<summary>💾 Performance Issues</summary>
 
 ```bash
-# Check system resources
-free -h
-df -h
+# Check memory usage
+docker stats minecraft-server
 
-# Reduce memory allocation
-cd /opt/minecraft-server
-sudo nano docker-compose.yml
-# Change MEMORY: "2G" to "1G"
+# View current configuration
+cd /opt/minecraft-server && cat docker-compose.yml
+
+# Increase memory allocation (edit docker-compose.yml)
+sudo nano /opt/minecraft-server/docker-compose.yml
+# Change MEMORY: "2G" to desired amount
 
 # Restart with new settings
-docker-compose restart
+docker compose restart
 ```
 
 </details>
 
 <details>
-<summary>🔍 Server Won't Start</summary>
+<summary>🔄 Update Issues</summary>
 
 ```bash
-# Check detailed logs
-docker logs minecraft-server --tail 100
-
-# Check docker-compose status
+# Force update to latest image
 cd /opt/minecraft-server
-docker-compose logs
+docker compose down
+docker compose pull
+docker compose up -d
 
-# Restart Docker service
-sudo systemctl restart docker
-```
-
-</details>
-
-<details>
-<summary>🔄 Update/Migration Issues</summary>
-
-```bash
-# Backup before update
-docker cp minecraft-server:/data ./backup-$(date +%Y%m%d)
-
-# Clean update
-cd /opt/minecraft-server
-docker-compose down
-docker-compose pull
-docker-compose up -d
+# Rollback if needed
+docker compose down
+docker run --rm -v minecraft-data:/data alpine rm -rf /data/server.jar
+docker compose up -d
 ```
 
 </details>
@@ -332,15 +299,15 @@ docker-compose up -d
 ```
 /opt/minecraft-server/
 ├── docker-compose.yml      # Main configuration
-├── logs/                   # Server logs (if mounted)
-└── minecraft-data/         # Docker volume (world data)
+└── data/                   # Server data volume
     ├── world/              # Main world
-    ├── world_nether/       # Nether dimension
-    ├── world_the_end/      # End dimension
     ├── server.properties   # Server configuration
     ├── ops.json           # Operator list
     ├── whitelist.json     # Whitelist (if enabled)
-    └── banned-players.json # Banned players
+    ├── logs/              # Server logs
+    ├── mods/              # Mods (Forge/Fabric)
+    ├── plugins/           # Plugins (Paper/Spigot)
+    └── config/            # Configuration files
 ```
 
 ## 📈 Performance Monitoring
@@ -349,48 +316,72 @@ docker-compose up -d
 # Real-time resource monitoring
 docker stats minecraft-server
 
-# Check server TPS (in-game)
-/tps
+# Check server TPS (in-game command for supported servers)
+tps
 
-# Memory usage details
-docker exec minecraft-server free -h
+# Monitor server performance
+docker logs minecraft-server | grep -i "performance\|lag\|tick"
 
-# Disk usage
-docker system df
+# Check startup time
+docker logs minecraft-server | grep -i "done\|started"
 ```
 
-## 🔐 Security Best Practices
+## 🚀 Quick Commands Reference
 
-- ✅ Use UFW firewall (auto-configured)
-- ✅ Regular backups of world data
-- ✅ Monitor server logs for suspicious activity
-- ✅ Keep Docker and system updated
-- ⚠️ Consider enabling online-mode for production
-- ⚠️ Use whitelist for private servers
+```bash
+# Essential Commands
+cd /opt/minecraft-server && docker compose logs -f  # View logs
+docker attach minecraft-server                      # Server console
+cd /opt/minecraft-server && docker compose restart  # Restart
+
+# File Management
+docker cp file.jar minecraft-server:/data/mods/     # Add mod
+docker cp file.jar minecraft-server:/data/plugins/  # Add plugin
+docker exec minecraft-server ls /data/              # List files
+
+# Backup & Restore
+docker cp minecraft-server:/data/world ./backup/    # Backup world
+docker cp minecraft-server:/data/ ./full-backup/    # Full backup
+```
+
+## 🎮 Server Type Specific Features
+
+### Forge Servers
+
+- Full mod support with automatic Forge installation
+- Mod compatibility checking
+- Forge-specific optimization flags
+
+### Fabric Servers
+
+- Lightweight mod loading
+- Better performance optimization
+- Modern mod ecosystem support
+
+### Paper/Spigot Servers
+
+- Plugin support with Bukkit/Spigot API
+- Advanced performance features
+- Anti-cheat and security enhancements
+
+### Vanilla Servers
+
+- Pure Minecraft experience
+- No modifications or plugins
+- Official server behavior
 
 ## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- [itzg/minecraft-server](https://github.com/itzg/docker-minecraft-server) for the excellent Docker image
-- Minecraft community for server optimization guides
-- Contributors and testers
+3. Test with different server types and versions
+4. Submit a pull request
 
 ## 📞 Support
 
 - 📧 **Issues**: [GitHub Issues](https://github.com/MochNad/minecraft-server-installer/issues)
 - 💬 **Discussions**: [GitHub Discussions](https://github.com/MochNad/minecraft-server-installer/discussions)
-- 📚 **Wiki**: [Project Wiki](https://github.com/MochNad/minecraft-server-installer/wiki)
+- 🔧 **Server Support**: Check respective server type documentation
 
 ---
 
