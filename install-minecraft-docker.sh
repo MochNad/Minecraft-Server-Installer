@@ -23,6 +23,36 @@ echo -e "${LIGHT_BLUE}╚══════════════════�
 echo -e "${YELLOW}🚀 Starting configuration process...${NC}"
 sleep 2
 
+# Function to show main menu
+show_main_menu() {
+    clear
+    echo -e "${LIGHT_BLUE}╔══════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${LIGHT_BLUE}║${WHITE}               🎯 Installation Type Selection 🎯              ${LIGHT_BLUE}║${NC}"
+    echo -e "${LIGHT_BLUE}╚══════════════════════════════════════════════════════════════╝${NC}"
+    echo -e "${CYAN}📋 Please select your installation type:${NC}"
+    echo ""
+    echo -e "${LIGHT_GREEN}1.${NC} ${WHITE}Full Installation${NC} ${ORANGE}(System update + Docker + Firewall + Server)${NC}"
+    echo -e "${LIGHT_GREEN}2.${NC} ${WHITE}Add New Server Only${NC} ${ORANGE}(Requires Docker already installed)${NC}"
+    echo ""
+    
+    while true; do
+        echo -ne "${CYAN}🔧 Select installation type (1-2): ${NC}"
+        read INSTALL_CHOICE
+        
+        INSTALL_CHOICE=$(echo "$INSTALL_CHOICE" | tr -d '[:space:]')
+        
+        case "$INSTALL_CHOICE" in
+            1) INSTALL_TYPE="FULL" echo -e "${LIGHT_GREEN}✅ Selected: Full Installation${NC}" break ;;
+            2) INSTALL_TYPE="SERVER_ONLY" echo -e "${LIGHT_GREEN}✅ Selected: Add New Server Only${NC}" break ;;
+            *) 
+                echo -e "${LIGHT_RED}❌ Please enter 1 or 2${NC}" 
+                ;;
+        esac
+    done
+    
+    sleep 2
+}
+
 # Function to check if running as root
 check_root() {
     if [ "$EUID" -ne 0 ]; then
@@ -39,6 +69,24 @@ get_server_configuration() {
     echo -e "${LIGHT_BLUE}╚══════════════════════════════════════════════════════════════╝${NC}"
     echo -e "${CYAN}📝 Please configure your Minecraft server settings${NC}"
     echo ""
+    
+    # Get server name
+    while true; do
+        echo -ne "${CYAN}🏷️  Enter server name (no spaces, use - or _): ${NC}"
+        read SERVER_NAME
+        
+        SERVER_NAME=$(echo "$SERVER_NAME" | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')
+        
+        if [[ "$SERVER_NAME" =~ ^[a-z0-9_-]+$ ]] && [ ${#SERVER_NAME} -ge 3 ] && [ ${#SERVER_NAME} -le 30 ]; then
+            echo -e "${LIGHT_GREEN}✅ Server name: $SERVER_NAME${NC}"
+            break
+        else
+            echo -e "${LIGHT_RED}❌ Please enter a valid name (3-30 characters, only letters, numbers, - and _)${NC}"
+        fi
+    done
+    
+    echo ""
+    sleep 1
     
     # Get Minecraft version
     echo -e "${PINK}🎯 Available Minecraft versions:${NC}"
@@ -171,6 +219,34 @@ get_server_configuration() {
     echo ""
     sleep 1
     
+    # Get game mode
+    echo -e "${PINK}🎮 Available game modes:${NC}"
+    echo -e "${LIGHT_GREEN}1.${NC} ${WHITE}Survival${NC} ${ORANGE}(gather resources, build, survive)${NC}"
+    echo -e "${LIGHT_GREEN}2.${NC} ${WHITE}Creative${NC} ${ORANGE}(unlimited resources, flying)${NC}"
+    echo -e "${LIGHT_GREEN}3.${NC} ${WHITE}Adventure${NC} ${ORANGE}(custom maps, limited interaction)${NC}"
+    echo -e "${LIGHT_GREEN}4.${NC} ${WHITE}Spectator${NC} ${ORANGE}(observe only, no interaction)${NC}"
+    echo ""
+    
+    while true; do
+        echo -ne "${CYAN}🎯 Select game mode (1-4, default 1): ${NC}"
+        read GAMEMODE_CHOICE
+        
+        GAMEMODE_CHOICE=${GAMEMODE_CHOICE:-1}
+        GAMEMODE_CHOICE=$(echo "$GAMEMODE_CHOICE" | tr -d '[:space:]')
+        
+        case "$GAMEMODE_CHOICE" in
+            1) GAMEMODE="survival"; GAMEMODE_NAME="Survival"; break ;;
+            2) GAMEMODE="creative"; GAMEMODE_NAME="Creative"; break ;;
+            3) GAMEMODE="adventure"; GAMEMODE_NAME="Adventure"; break ;;
+            4) GAMEMODE="spectator"; GAMEMODE_NAME="Spectator"; break ;;
+            *) echo -e "${LIGHT_RED}❌ Please enter a number between 1-4${NC}" ;;
+        esac
+    done
+    echo -e "${LIGHT_GREEN}✅ Game mode: $GAMEMODE_NAME${NC}"
+    
+    echo ""
+    sleep 1
+    
     # Get memory allocation
     echo -e "${PINK}💾 Available memory options:${NC}"
     echo -e "${LIGHT_GREEN}1.${NC} ${WHITE}1GB${NC}"
@@ -224,11 +300,13 @@ get_server_configuration() {
     echo -e "${LIGHT_BLUE}╔══════════════════════════════════════════════════════════════╗${NC}"
     echo -e "${LIGHT_BLUE}║${WHITE}                 📋 Configuration Summary 📋                 ${LIGHT_BLUE}║${NC}"
     echo -e "${LIGHT_BLUE}╚══════════════════════════════════════════════════════════════╝${NC}"
+    echo -e "${PINK}🏷️  Server Name:${NC} ${LIGHT_GREEN}$SERVER_NAME${NC}"
     echo -e "${PINK}🎮 Minecraft Version:${NC} ${LIGHT_GREEN}$MC_VERSION${NC}"
     echo -e "${PINK}⚡ Server Type:${NC} ${LIGHT_GREEN}$SERVER_TYPE${NC}"
     echo -e "${PINK}🌐 Server Port:${NC} ${LIGHT_GREEN}$SERVER_PORT${NC}"
     echo -e "${PINK}🔓 Cracked Support:${NC} ${LIGHT_GREEN}$CRACKED_STATUS${NC}"
     echo -e "${PINK}👥 Max Players:${NC} ${LIGHT_GREEN}$MAX_PLAYERS${NC}"
+    echo -e "${PINK}🎯 Game Mode:${NC} ${LIGHT_GREEN}$GAMEMODE_NAME${NC}"
     echo -e "${PINK}💾 Memory Allocation:${NC} ${LIGHT_GREEN}$MEMORY${NC} ${ORANGE}(limit: $MEMORY_LIMIT)${NC}"
     echo ""
     
@@ -361,8 +439,27 @@ setup_minecraft_server() {
     echo -e "${LIGHT_BLUE}╚══════════════════════════════════════════════════════════════╝${NC}"
     echo -e "${YELLOW}🎮 Setting up Minecraft server with your configuration...${NC}"
     
-    mkdir -p /opt/minecraft-server
-    cd /opt/minecraft-server
+    # Create server-specific directory
+    SERVER_DIR="/opt/minecraft-servers/$SERVER_NAME"
+    mkdir -p "$SERVER_DIR"
+    cd "$SERVER_DIR"
+    
+    # Check if server already exists
+    if [ -f "docker-compose.yml" ]; then
+        echo -e "${YELLOW}⚠️  Server '$SERVER_NAME' already exists!${NC}"
+        echo -e "${CYAN}Do you want to overwrite it? (y/n): ${NC}"
+        read OVERWRITE_CHOICE
+        
+        OVERWRITE_CHOICE=$(echo "$OVERWRITE_CHOICE" | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')
+        
+        if [[ "$OVERWRITE_CHOICE" != "y" && "$OVERWRITE_CHOICE" != "yes" ]]; then
+            echo -e "${LIGHT_RED}❌ Installation cancelled.${NC}"
+            exit 1
+        fi
+        
+        echo -e "${YELLOW}🛑 Stopping existing server...${NC}"
+        docker compose down 2>/dev/null || true
+    fi
     
     cat > docker-compose.yml << EOF
 version: '3.9'
@@ -370,7 +467,7 @@ version: '3.9'
 services:
   minecraft:
     image: itzg/minecraft-server:latest
-    container_name: minecraft-server
+    container_name: minecraft-$SERVER_NAME
     ports:
       - "$SERVER_PORT:25565"
     environment:
@@ -380,7 +477,9 @@ services:
       ONLINE_MODE: "$ONLINE_MODE"
       DIFFICULTY: "normal"
       MAX_PLAYERS: "$MAX_PLAYERS"
-      MOTD: "Welcome to $SERVER_TYPE Server v$MC_VERSION"
+      MODE: "$GAMEMODE"
+      MOTD: "Welcome to $SERVER_NAME - $SERVER_TYPE Server v$MC_VERSION"
+      LEVEL_NAME: "$SERVER_NAME-world"
       MEMORY: "$MEMORY"
       USE_AIKAR_FLAGS: "TRUE"
       ENABLE_RCON: "TRUE"
@@ -399,7 +498,7 @@ services:
           memory: $MEMORY
 EOF
 
-    echo -e "${LIGHT_GREEN}✅ Docker Compose configuration created at /opt/minecraft-server/docker-compose.yml${NC}"
+    echo -e "${LIGHT_GREEN}✅ Docker Compose configuration created at $SERVER_DIR/docker-compose.yml${NC}"
     sleep 2
 }
 
@@ -410,7 +509,7 @@ start_server() {
     echo -e "${LIGHT_BLUE}║${WHITE}              🚀 Step 5: Starting Minecraft Server 🚀            ${LIGHT_BLUE}║${NC}"
     echo -e "${LIGHT_BLUE}╚══════════════════════════════════════════════════════════════╝${NC}"
     echo -e "${YELLOW}🎮 Starting Minecraft server...${NC}"
-    cd /opt/minecraft-server
+    cd "/opt/minecraft-servers/$SERVER_NAME"
     
     echo -e "${CYAN}📥 Pulling latest Docker image...${NC}"
     docker compose pull
@@ -424,24 +523,29 @@ start_server() {
     echo -e "${LIGHT_BLUE}╚══════════════════════════════════════════════════════════════╝${NC}"
     echo ""
     echo -e "${PINK}📊 Server details:${NC}"
+    echo -e "${CYAN}  • Server Name:${NC} ${LIGHT_GREEN}$SERVER_NAME${NC}"
     echo -e "${CYAN}  • Version:${NC} ${LIGHT_GREEN}$MC_VERSION${NC}"
     echo -e "${CYAN}  • Type:${NC} ${LIGHT_GREEN}$SERVER_TYPE${NC}"
     echo -e "${CYAN}  • Port:${NC} ${LIGHT_GREEN}$SERVER_PORT${NC}"
+    echo -e "${CYAN}  • Game Mode:${NC} ${LIGHT_GREEN}$GAMEMODE_NAME${NC}"
     echo -e "${CYAN}  • Cracked players:${NC} ${LIGHT_GREEN}$CRACKED_STATUS${NC}"
+    echo -e "${CYAN}  • World Name:${NC} ${LIGHT_GREEN}$SERVER_NAME-world${NC}"
+    echo -e "${CYAN}  • Server Directory:${NC} ${LIGHT_GREEN}/opt/minecraft-servers/$SERVER_NAME${NC}"
     echo ""
     echo -e "${PINK}⚡ Useful commands:${NC}"
-    echo -e "${CYAN}  • Go to server directory:${NC} ${LIGHT_BLUE}cd /opt/minecraft-server${NC}"
+    echo -e "${CYAN}  • Go to server directory:${NC} ${LIGHT_BLUE}cd /opt/minecraft-servers/$SERVER_NAME${NC}"
     echo -e "${CYAN}  • Check logs:${NC} ${LIGHT_BLUE}docker compose logs -f${NC}"
     echo -e "${CYAN}  • Stop server:${NC} ${LIGHT_BLUE}docker compose down${NC}"
     echo -e "${CYAN}  • Restart server:${NC} ${LIGHT_BLUE}docker compose restart${NC}"
-    echo -e "${CYAN}  • Server console:${NC} ${LIGHT_BLUE}docker attach minecraft-server${NC}"
+    echo -e "${CYAN}  • Server console:${NC} ${LIGHT_BLUE}docker attach minecraft-$SERVER_NAME${NC}"
+    echo -e "${CYAN}  • List all servers:${NC} ${LIGHT_BLUE}ls /opt/minecraft-servers/${NC}"
     echo ""
     echo -e "${LIGHT_GREEN}🎉 Server is starting! It might take a few minutes.${NC}"
-    echo -e "${YELLOW}🌐 Connect with IP: ${WHITE}$(curl -s ipinfo.io/ip)${NC} on port ${LIGHT_GREEN}$SERVER_PORT${NC}"
+    echo -e "${YELLOW}🌐 Connect with: ${WHITE}$(curl -s ipinfo.io/ip):$SERVER_PORT${NC}"
 }
 
-# Main execution
-main() {
+# Full installation function
+full_installation() {
     check_root
     get_server_configuration
     update_system
@@ -449,6 +553,82 @@ main() {
     configure_firewall
     setup_minecraft_server
     start_server
+}
+
+# Server-only installation function
+server_only_installation() {
+    check_root
+    check_docker_prerequisites
+    if [ "$INSTALL_TYPE" == "FULL" ]; then
+        full_installation
+        return
+    fi
+    get_server_configuration
+    configure_firewall  # Still configure firewall for new port
+    setup_minecraft_server
+    start_server
+}
+
+# Function to check Docker prerequisites for server-only installation
+check_docker_prerequisites() {
+    clear
+    echo -e "${LIGHT_BLUE}╔══════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${LIGHT_BLUE}║${WHITE}              🐳 Checking Docker Prerequisites 🐳              ${LIGHT_BLUE}║${NC}"
+    echo -e "${LIGHT_BLUE}╚══════════════════════════════════════════════════════════════╝${NC}"
+    
+    echo -e "${YELLOW}🔍 Checking Docker installation...${NC}"
+    
+    if ! command -v docker &> /dev/null; then
+        echo -e "${LIGHT_RED}❌ Docker is not installed!${NC}"
+        echo -e "${YELLOW}💡 Please run full installation first or install Docker manually.${NC}"
+        echo ""
+        echo -e "${CYAN}Would you like to switch to full installation? (y/n): ${NC}"
+        read SWITCH_CHOICE
+        
+        SWITCH_CHOICE=$(echo "$SWITCH_CHOICE" | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')
+        
+        if [[ "$SWITCH_CHOICE" == "y" || "$SWITCH_CHOICE" == "yes" ]]; then
+            INSTALL_TYPE="FULL"
+            echo -e "${LIGHT_GREEN}✅ Switching to full installation...${NC}"
+            sleep 2
+            return 0
+        else
+            echo -e "${LIGHT_RED}❌ Installation cancelled.${NC}"
+            exit 1
+        fi
+    fi
+    
+    if ! docker compose version &> /dev/null; then
+        echo -e "${LIGHT_RED}❌ Docker Compose is not available!${NC}"
+        echo -e "${YELLOW}💡 Please run full installation first.${NC}"
+        exit 1
+    fi
+    
+    if ! systemctl is-active --quiet docker; then
+        echo -e "${YELLOW}🔄 Starting Docker service...${NC}"
+        systemctl start docker
+    fi
+    
+    echo -e "${LIGHT_GREEN}✅ Docker is installed and running!${NC}"
+    sleep 2
+}
+
+# Main execution
+main() {
+    show_main_menu
+    
+    case "$INSTALL_TYPE" in
+        "FULL")
+            full_installation
+            ;;
+        "SERVER_ONLY")
+            server_only_installation
+            ;;
+        *)
+            echo -e "${LIGHT_RED}❌ Invalid installation type${NC}"
+            exit 1
+            ;;
+    esac
 }
 
 # Run main function

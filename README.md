@@ -7,7 +7,7 @@
 [![Ubuntu](https://img.shields.io/badge/Ubuntu-18.04+-orange.svg)](https://ubuntu.com/)
 [![Minecraft](https://img.shields.io/badge/Minecraft-Multiple%20Versions-green.svg)](https://minecraft.net/)
 
-**Automated Minecraft server installer with Docker support for multiple versions and server types**
+**Automated Minecraft server installer with Docker support for multiple versions, server types, and multi-server management**
 
 [Quick Start](#-quick-start) • [Installation](#-installation) • [Features](#-features) • [Server Types](#-server-types)
 
@@ -39,6 +39,13 @@ sudo ./install.sh
 
 ## ⚡ Installation Methods
 
+The installer now supports two installation types:
+
+### 🎯 Installation Types
+
+1. **Full Installation** - Complete setup with system updates, Docker installation, firewall configuration, and server setup
+2. **Add New Server Only** - Quick server addition for systems with Docker already installed
+
 ### Method 1: Secure Installation (Recommended)
 
 ```bash
@@ -51,6 +58,10 @@ cat install.sh
 # Make executable and run
 chmod +x install.sh
 sudo ./install.sh
+
+# Select installation type:
+# 1. Full Installation (first time users)
+# 2. Add New Server Only (existing Docker users)
 ```
 
 ### Method 2: Manual Download
@@ -87,6 +98,8 @@ sudo ./install-minecraft-docker.sh
 - 🔒 **Security**: Automatic firewall configuration with SSH protection
 - 🎮 **Multi-Version**: Support for multiple Minecraft versions
 - 🔧 **Multi-Type**: Support for various server types
+- 🏷️ **Named Servers**: Custom server names for better organization
+- 📁 **Multi-Server**: Run multiple servers simultaneously on different ports
 
 ### 🎮 Supported Versions
 
@@ -119,206 +132,324 @@ sudo ./install-minecraft-docker.sh
 The installer provides an interactive setup where you can configure:
 
 ```
+🏷️  Server Name (custom naming for organization)
 🎯 Minecraft Version Selection (1-9 options)
 ⚡ Server Type Selection (7 options)
 🌐 Custom Port Configuration (default: 25565)
 🔓 Cracked Player Support (optional)
 👥 Maximum Players (1-200)
+🎮 Game Mode Selection (Survival/Creative/Adventure/Spectator)
 💾 Memory Allocation (1GB-Custom)
 ```
+
+### 🎮 Available Game Modes
+
+| Mode          | Description                      | Best For             |
+| ------------- | -------------------------------- | -------------------- |
+| **Survival**  | Gather resources, build, survive | Classic gameplay     |
+| **Creative**  | Unlimited resources, flying      | Building & designing |
+| **Adventure** | Custom maps, limited interaction | Story-driven content |
+| **Spectator** | Observe only, no interaction     | Watching & exploring |
 
 ### Example Configuration Output
 
 ```yaml
 📋 Configuration Summary:
+├── Server Name: survival-server
 ├── Version: 1.21.7
 ├── Type: FORGE
 ├── Port: 25565
 ├── Cracked Support: ENABLED
 ├── Max Players: 20
-└── Memory: 2G (limit: 3G)
+├── Game Mode: Survival
+├── Memory: 2G (limit: 3G)
+└── World Name: survival-server-world
 ```
 
-## 🛠️ Server Management
+## 🛠️ Essential Server Management Commands
 
-### Basic Commands
+### 🎮 Basic Server Operations
 
 ```bash
-# Check server status
+# Navigate to specific server
+cd /opt/minecraft-servers/YOUR_SERVER_NAME
+
+# View all servers
+ls /opt/minecraft-servers/
+
+# Check all running containers
 docker ps
 
-# View live logs
-cd /opt/minecraft-server && docker compose logs -f
-
-# Server console access
-docker attach minecraft-server
-
-# Check server details
-docker inspect minecraft-server
+# Check all containers (including stopped)
+docker ps -a
 ```
 
-### Control Commands
+### 📋 Server Control Commands
 
 ```bash
-# Stop server
-cd /opt/minecraft-server && docker compose down
-
 # Start server
-cd /opt/minecraft-server && docker compose up -d
+cd /opt/minecraft-servers/SERVER_NAME && docker compose up -d
+
+# Stop server
+cd /opt/minecraft-servers/SERVER_NAME && docker compose down
 
 # Restart server
-cd /opt/minecraft-server && docker compose restart
+cd /opt/minecraft-servers/SERVER_NAME && docker compose restart
 
-# Update server
-cd /opt/minecraft-server && docker compose pull && docker compose up -d
+# View server logs (real-time)
+cd /opt/minecraft-servers/SERVER_NAME && docker compose logs -f
+
+# View server logs (last 50 lines)
+cd /opt/minecraft-servers/SERVER_NAME && docker compose logs --tail=50
 ```
 
-### Advanced Management
+### 🔧 Server Console Access
 
 ```bash
-# Access server files
-docker exec -it minecraft-server bash
+# Access server console (Ctrl+P, Ctrl+Q to detach safely)
+docker attach minecraft-SERVER_NAME
 
-# Backup world data
-docker cp minecraft-server:/data/world ./backup-world-$(date +%Y%m%d)/
+# Send command to server without attaching
+docker exec minecraft-SERVER_NAME rcon-cli "your-command-here"
 
-# View resource usage
-docker stats minecraft-server
+# Execute bash in server container
+docker exec -it minecraft-SERVER_NAME bash
+```
 
+### 📊 Monitoring & Status
+
+```bash
+# Check resource usage for all containers
+docker stats
+
+# Check specific server resource usage
+docker stats minecraft-SERVER_NAME
+
+# Check server startup status
+docker logs minecraft-SERVER_NAME | grep -i "done\|started\|ready"
+
+# Check for errors
+docker logs minecraft-SERVER_NAME | grep -i "error\|exception\|failed"
+
+# Check server version and type
+docker exec minecraft-SERVER_NAME cat /data/version
+
+# View server properties
+docker exec minecraft-SERVER_NAME cat /data/server.properties
+```
+
+### 🔄 Server Updates & Maintenance
+
+```bash
+# Update server to latest version
+cd /opt/minecraft-servers/SERVER_NAME
+docker compose pull
+docker compose down
+docker compose up -d
+
+# Update all servers (run from any location)
+for server in /opt/minecraft-servers/*/; do
+  echo "Updating $(basename "$server")..."
+  cd "$server" && docker compose pull && docker compose restart
+done
+
+# View server update logs
+docker logs minecraft-SERVER_NAME | grep -i "updating\|downloading"
+```
+
+### 💾 Backup & Restore Operations
+
+```bash
+# Backup specific server world
+docker cp minecraft-SERVER_NAME:/data/world ./backup-SERVER_NAME-world-$(date +%Y%m%d_%H%M%S)/
+
+# Full server backup
+docker cp minecraft-SERVER_NAME:/data/ ./backup-SERVER_NAME-full-$(date +%Y%m%d_%H%M%S)/
+
+# Backup all servers
+for container in $(docker ps --format "table {{.Names}}" | grep "minecraft-"); do
+  echo "Backing up $container..."
+  docker cp $container:/data/ ./backup-$container-$(date +%Y%m%d_%H%M%S)/
+done
+
+# Restore world from backup
+docker cp ./backup-world/ minecraft-SERVER_NAME:/data/
+docker restart minecraft-SERVER_NAME
+```
+
+### 🔧 Configuration Management
+
+```bash
 # Edit server properties
-docker exec -it minecraft-server nano /data/server.properties
-```
-
-## 🔧 Mod and Plugin Management
-
-### For Modded Servers (Forge/Fabric)
-
-```bash
-# Add mods
-docker cp yourmod.jar minecraft-server:/data/mods/
-
-# List installed mods
-docker exec minecraft-server ls -la /data/mods/
-
-# Remove a mod
-docker exec minecraft-server rm /data/mods/unwanted-mod.jar
-```
-
-### For Plugin Servers (Paper/Spigot/Purpur)
-
-```bash
-# Add plugins
-docker cp yourplugin.jar minecraft-server:/data/plugins/
-
-# List installed plugins
-docker exec minecraft-server ls -la /data/plugins/
-
-# Remove a plugin
-docker exec minecraft-server rm /data/plugins/unwanted-plugin.jar
-```
-
-## 🔐 Security Features
-
-- ✅ **SSH Protection**: Automatic SSH access protection during firewall setup
-- ✅ **UFW Firewall**: Auto-configured with secure defaults
-- ✅ **Port Management**: Only necessary ports (22, custom) are opened
-- ✅ **Docker Isolation**: Server runs in isolated container
-- ✅ **RCON Security**: Configurable RCON access with password protection
-
-## 🔍 Troubleshooting
-
-### Common Issues
-
-<details>
-<summary>🔧 Server Won't Start</summary>
-
-```bash
-# Check container status
-docker ps -a
-
-# View startup logs
-docker logs minecraft-server
-
-# Check for common issues
-docker logs minecraft-server | grep -i "error\|exception"
-
-# Restart with fresh configuration
-cd /opt/minecraft-server && docker compose down && docker compose up -d
-```
-
-</details>
-
-<details>
-<summary>🎮 Connection Issues</summary>
-
-```bash
-# Check server status
-docker ps | grep minecraft
-
-# Verify port is open
-sudo ufw status | grep YOUR_PORT
-
-# Test server connectivity
-telnet YOUR_SERVER_IP YOUR_PORT
-
-# Check if server is accepting connections
-docker logs minecraft-server | grep -i "done\|started"
-```
-
-</details>
-
-<details>
-<summary>💾 Performance Issues</summary>
-
-```bash
-# Check memory usage
-docker stats minecraft-server
+docker exec -it minecraft-SERVER_NAME nano /data/server.properties
 
 # View current configuration
-cd /opt/minecraft-server && cat docker-compose.yml
+docker exec minecraft-SERVER_NAME cat /data/server.properties | grep -v "^#"
 
-# Increase memory allocation (edit docker-compose.yml)
-sudo nano /opt/minecraft-server/docker-compose.yml
-# Change MEMORY: "2G" to desired amount
+# Change game mode on running server
+docker exec minecraft-SERVER_NAME rcon-cli "defaultgamemode survival"
+docker exec minecraft-SERVER_NAME rcon-cli "defaultgamemode creative"
+docker exec minecraft-SERVER_NAME rcon-cli "defaultgamemode adventure"
+docker exec minecraft-SERVER_NAME rcon-cli "defaultgamemode spectator"
 
-# Restart with new settings
-docker compose restart
+# Edit docker-compose configuration
+cd /opt/minecraft-servers/SERVER_NAME && nano docker-compose.yml
+
+# Apply configuration changes
+cd /opt/minecraft-servers/SERVER_NAME && docker compose restart
 ```
 
-</details>
-
-<details>
-<summary>🔄 Update Issues</summary>
+### 🎲 Mod & Plugin Management
 
 ```bash
-# Force update to latest image
-cd /opt/minecraft-server
-docker compose down
-docker compose pull
-docker compose up -d
+# Add mod/plugin to server
+docker cp yourfile.jar minecraft-SERVER_NAME:/data/mods/     # For modded servers
+docker cp yourfile.jar minecraft-SERVER_NAME:/data/plugins/ # For plugin servers
 
-# Rollback if needed
-docker compose down
-docker run --rm -v minecraft-data:/data alpine rm -rf /data/server.jar
-docker compose up -d
+# List installed mods
+docker exec minecraft-SERVER_NAME ls -la /data/mods/
+
+# List installed plugins
+docker exec minecraft-SERVER_NAME ls -la /data/plugins/
+
+# Remove mod/plugin
+docker exec minecraft-SERVER_NAME rm /data/mods/unwanted-mod.jar
+docker exec minecraft-SERVER_NAME rm /data/plugins/unwanted-plugin.jar
+
+# Check mod/plugin compatibility
+docker logs minecraft-SERVER_NAME | grep -i "mod\|plugin" | tail -20
 ```
 
-</details>
+### 🌐 Network & Connectivity
+
+```bash
+# Check server port status
+sudo netstat -tlnp | grep :PORT_NUMBER
+
+# Test server connectivity
+telnet YOUR_SERVER_IP PORT_NUMBER
+
+# Check firewall status
+sudo ufw status
+
+# Add new port for additional server
+sudo ufw allow NEW_PORT/tcp
+sudo ufw allow NEW_PORT/udp
+
+# View all open ports
+sudo ufw status numbered
+```
+
+### 🚨 Troubleshooting Commands
+
+```bash
+# Check Docker service status
+sudo systemctl status docker
+
+# Restart Docker service
+sudo systemctl restart docker
+
+# Check system resources
+free -h && df -h
+
+# View system logs for Docker
+sudo journalctl -u docker.service --since "1 hour ago"
+
+# Check container health
+docker inspect minecraft-SERVER_NAME | grep -i health
+
+# Force remove stuck container
+docker rm -f minecraft-SERVER_NAME
+
+# Clean up unused Docker resources
+docker system prune -a
+```
+
+### 📈 Performance Optimization
+
+```bash
+# View Java process information
+docker exec minecraft-SERVER_NAME ps aux | grep java
+
+# Check JVM memory usage
+docker exec minecraft-SERVER_NAME jstat -gc 1
+
+# Monitor server TPS (if supported)
+docker exec minecraft-SERVER_NAME rcon-cli "tps"
+
+# View server performance stats
+docker exec minecraft-SERVER_NAME rcon-cli "perf start"
+
+# Optimize server settings
+docker exec -it minecraft-SERVER_NAME nano /data/spigot.yml  # For Spigot/Paper
+docker exec -it minecraft-SERVER_NAME nano /data/paper.yml   # For Paper
+```
+
+### 🎯 Quick Server Management Scripts
+
+Create these helpful scripts for easier management:
+
+```bash
+# Create server management script
+cat > ~/manage-minecraft.sh << 'EOF'
+#!/bin/bash
+SERVER_NAME=$1
+ACTION=$2
+
+case $ACTION in
+    "start")
+        cd /opt/minecraft-servers/$SERVER_NAME && docker compose up -d
+        ;;
+    "stop")
+        cd /opt/minecraft-servers/$SERVER_NAME && docker compose down
+        ;;
+    "restart")
+        cd /opt/minecraft-servers/$SERVER_NAME && docker compose restart
+        ;;
+    "logs")
+        cd /opt/minecraft-servers/$SERVER_NAME && docker compose logs -f
+        ;;
+    "console")
+        docker attach minecraft-$SERVER_NAME
+        ;;
+    "gamemode")
+        docker exec minecraft-$SERVER_NAME rcon-cli "defaultgamemode $3"
+        ;;
+    *)
+        echo "Usage: $0 SERVER_NAME {start|stop|restart|logs|console|gamemode MODE}"
+        echo "Game modes: survival, creative, adventure, spectator"
+        ;;
+esac
+EOF
+
+chmod +x ~/manage-minecraft.sh
+
+# Usage examples:
+# ~/manage-minecraft.sh survival-server start
+# ~/manage-minecraft.sh creative-server logs
+# ~/manage-minecraft.sh pvp-server console
+# ~/manage-minecraft.sh build-server gamemode creative
+```
 
 ## 📁 File Structure
 
 ```
-/opt/minecraft-server/
-├── docker-compose.yml      # Main configuration
-└── data/                   # Server data volume
-    ├── world/              # Main world
-    ├── server.properties   # Server configuration
-    ├── ops.json           # Operator list
-    ├── whitelist.json     # Whitelist (if enabled)
-    ├── logs/              # Server logs
-    ├── mods/              # Mods (Forge/Fabric)
-    ├── plugins/           # Plugins (Paper/Spigot)
-    └── config/            # Configuration files
+/opt/minecraft-servers/           # Multi-server directory
+├── server1-name/                 # Individual server directory
+│   ├── docker-compose.yml        # Server configuration
+│   └── data/                     # Server data volume
+│       ├── world/                # Main world
+│       ├── server.properties     # Server configuration
+│       ├── ops.json             # Operator list
+│       ├── whitelist.json       # Whitelist (if enabled)
+│       ├── logs/                # Server logs
+│       ├── mods/                # Mods (Forge/Fabric)
+│       ├── plugins/             # Plugins (Paper/Spigot)
+│       └── config/              # Configuration files
+├── server2-name/                 # Another server
+│   └── ...
+└── server3-name/                 # Yet another server
+    └── ...
 ```
 
 ## 📈 Performance Monitoring
@@ -337,62 +468,44 @@ docker logs minecraft-server | grep -i "performance\|lag\|tick"
 docker logs minecraft-server | grep -i "done\|started"
 ```
 
-## 🚀 Quick Commands Reference
+## 🚀 Quick Commands Reference Card
+
+### Essential Daily Commands
 
 ```bash
-# Essential Commands
-cd /opt/minecraft-server && docker compose logs -f  # View logs
-docker attach minecraft-server                      # Server console
-cd /opt/minecraft-server && docker compose restart  # Restart
+# Server Status Check
+docker ps | grep minecraft                          # List running servers
+ls /opt/minecraft-servers/                         # List all servers
 
-# File Management
-docker cp file.jar minecraft-server:/data/mods/     # Add mod
-docker cp file.jar minecraft-server:/data/plugins/  # Add plugin
-docker exec minecraft-server ls /data/              # List files
+# Server Control
+cd /opt/minecraft-servers/SERVER_NAME && docker compose up -d      # Start
+cd /opt/minecraft-servers/SERVER_NAME && docker compose down       # Stop
+cd /opt/minecraft-servers/SERVER_NAME && docker compose restart    # Restart
 
-# Backup & Restore
-docker cp minecraft-server:/data/world ./backup/    # Backup world
-docker cp minecraft-server:/data/ ./full-backup/    # Full backup
+# Monitoring
+docker stats minecraft-SERVER_NAME                 # Resource usage
+docker logs minecraft-SERVER_NAME --tail=50        # Recent logs
+docker attach minecraft-SERVER_NAME                # Console access
+
+# Quick Backup
+docker cp minecraft-SERVER_NAME:/data/world ./backup-$(date +%Y%m%d)/
 ```
 
-## 🎮 Server Type Specific Features
+### Multi-Server Management
 
-### Forge Servers
+```bash
+# Start all servers
+for d in /opt/minecraft-servers/*/; do cd "$d" && docker compose up -d; done
 
-- Full mod support with automatic Forge installation
-- Mod compatibility checking
-- Forge-specific optimization flags
+# Stop all servers
+for d in /opt/minecraft-servers/*/; do cd "$d" && docker compose down; done
 
-### Fabric Servers
+# Check all server status
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep minecraft
 
-- Lightweight mod loading
-- Better performance optimization
-- Modern mod ecosystem support
-
-### Paper/Spigot Servers
-
-- Plugin support with Bukkit/Spigot API
-- Advanced performance features
-- Anti-cheat and security enhancements
-
-### Vanilla Servers
-
-- Pure Minecraft experience
-- No modifications or plugins
-- Official server behavior
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Test with different server types and versions
-4. Submit a pull request
-
-## 📞 Support
-
-- 📧 **Issues**: [GitHub Issues](https://github.com/MochNad/minecraft-server-installer/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/MochNad/minecraft-server-installer/discussions)
-- 🔧 **Server Support**: Check respective server type documentation
+# Update all servers
+for d in /opt/minecraft-servers/*/; do cd "$d" && docker compose pull && docker compose restart; done
+```
 
 ---
 
